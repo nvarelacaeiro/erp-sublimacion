@@ -3,9 +3,10 @@ node_modules/
 .pnpm-store/
 
 # Build outputs
-dist/
-.next/
-out/
+apps/api/dist/
+apps/web/.next/
+apps/web/out/
+# shared/dist sí se commitea para que Railway/Vercel no necesiten buildarlo
 
 # Env files (nunca subir al repo)
 .env
