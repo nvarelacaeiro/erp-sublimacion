@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify'
 import bcrypt from 'bcryptjs'
-import { loginSchema } from '@erp/shared'
+import { loginSchema } from '../shared'
 import { prisma } from '../lib/prisma'
 import { handleError, AppError } from '../lib/errors'
 

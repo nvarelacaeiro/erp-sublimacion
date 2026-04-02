@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify'
-import { clientSchema } from '@erp/shared'
+import { clientSchema } from '../shared'
 import { prisma } from '../lib/prisma'
 import { handleError, NotFoundError } from '../lib/errors'
 

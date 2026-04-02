@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify'
-import { quoteSchema } from '@erp/shared'
+import { quoteSchema } from '../shared'
 import { prisma } from '../lib/prisma'
 import { handleError, NotFoundError, AppError } from '../lib/errors'
 import { getNextNumber } from '../services/numbering.service'

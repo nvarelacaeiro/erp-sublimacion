@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify'
-import { transactionSchema, payAccountSchema } from '@erp/shared'
+import { transactionSchema, payAccountSchema } from '../shared'
 import { TransactionType, TransactionRefType, AccountStatus } from '@prisma/client'
 import { prisma } from '../lib/prisma'
 import { handleError, NotFoundError, AppError } from '../lib/errors'

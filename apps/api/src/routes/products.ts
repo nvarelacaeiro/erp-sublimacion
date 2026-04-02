@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify'
-import { productSchema, stockAdjustmentSchema } from '@erp/shared'
+import { productSchema, stockAdjustmentSchema } from '../shared'
 import { MovementRefType } from '@prisma/client'
 import { prisma } from '../lib/prisma'
 import { handleError, NotFoundError } from '../lib/errors'
