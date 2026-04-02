@@ -1,0 +1,19 @@
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = [
+  "corepack enable",
+  "corepack prepare pnpm@9.15.9 --activate",
+  "cd /app && pnpm install --frozen-lockfile"
+]
+
+[phases.build]
+cmds = [
+  "cd /app/packages/shared && pnpm build",
+  "cd /app/apps/api && pnpm exec prisma generate",
+  "cd /app/apps/api && pnpm exec tsc"
+]
+
+[start]
+cmd = "cd /app/apps/api && pnpm exec prisma migrate deploy && node dist/index.js"
