@@ -1,5 +1,11 @@
 import { z } from 'zod'
 
+// ID opcional: acepta cuid válido, null, undefined o string vacío (→ null)
+const optionalId = z.preprocess(
+  (v) => (v === '' ? null : v),
+  z.string().min(1).nullable().optional(),
+)
+
 // ── Auth ──────────────────────────────────────────────────────
 export const loginSchema = z.object({
   email: z.string().email('Email inválido'),
@@ -8,7 +14,7 @@ export const loginSchema = z.object({
 
 // ── Producto ──────────────────────────────────────────────────
 export const productSchema = z.object({
-  categoryId: z.string().cuid().nullable().optional(),
+  categoryId: optionalId,
   name: z.string().min(1, 'El nombre es requerido').max(100),
   sku: z.string().max(50).nullable().optional(),
   description: z.string().max(500).nullable().optional(),
@@ -34,7 +40,7 @@ export const supplierSchema = clientSchema // misma estructura
 
 // ── Items de línea ────────────────────────────────────────────
 export const lineItemSchema = z.object({
-  productId: z.string().cuid().nullable().optional(),
+  productId: optionalId,
   description: z.string().min(1, 'La descripción es requerida'),
   quantity: z.number().positive('La cantidad debe ser mayor a 0'),
   unitPrice: z.number().min(0),
@@ -42,7 +48,7 @@ export const lineItemSchema = z.object({
 
 // ── Presupuesto ───────────────────────────────────────────────
 export const quoteSchema = z.object({
-  clientId: z.string().cuid().nullable().optional(),
+  clientId: optionalId,
   validUntil: z.string().datetime().nullable().optional(),
   discount: z.number().min(0).max(100).default(0),
   notes: z.string().max(500).nullable().optional(),
@@ -51,8 +57,8 @@ export const quoteSchema = z.object({
 
 // ── Venta ─────────────────────────────────────────────────────
 export const saleSchema = z.object({
-  clientId: z.string().cuid().nullable().optional(),
-  quoteId: z.string().cuid().nullable().optional(),
+  clientId: optionalId,
+  quoteId: optionalId,
   date: z.string().datetime().optional(),
   paymentMethod: z.enum(['CASH', 'TRANSFER', 'CARD', 'MERCADOPAGO', 'CREDIT', 'OTHER']),
   discount: z.number().min(0).max(100).default(0),
@@ -62,14 +68,14 @@ export const saleSchema = z.object({
 
 // ── Compra ────────────────────────────────────────────────────
 export const purchaseItemSchema = z.object({
-  productId: z.string().cuid().nullable().optional(),
+  productId: optionalId,
   description: z.string().min(1),
   quantity: z.number().positive(),
   unitCost: z.number().min(0),
 })
 
 export const purchaseSchema = z.object({
-  supplierId: z.string().cuid().nullable().optional(),
+  supplierId: optionalId,
   date: z.string().datetime().optional(),
   notes: z.string().max(500).nullable().optional(),
   items: z.array(purchaseItemSchema).min(1),
