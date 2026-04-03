@@ -1,5 +1,5 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/auth.store'
 import { Sidebar } from '@/components/layout/Sidebar'
@@ -9,12 +9,17 @@ import { TopBar } from '@/components/layout/TopBar'
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const { user } = useAuthStore()
+  const [hydrated, setHydrated] = useState(false)
 
   useEffect(() => {
-    if (!user) router.replace('/login')
-  }, [user, router])
+    setHydrated(true)
+  }, [])
 
-  if (!user) return null
+  useEffect(() => {
+    if (hydrated && !user) router.replace('/login')
+  }, [user, router, hydrated])
+
+  if (!hydrated || !user) return null
 
   return (
     <div className="flex h-dvh bg-gray-50">
