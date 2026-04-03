@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient } from '@/hooks/useClients'
 import { formatCurrency } from '@/lib/utils'
-import { Users, Search, Pencil, Trash2 } from 'lucide-react'
+import { Users, Search, Pencil, Trash2, Phone, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
@@ -127,6 +127,26 @@ export default function ClientsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                {client.phone && (
+                  <a
+                    href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-lg hover:bg-green-50 text-gray-400 hover:text-green-600"
+                    title="WhatsApp"
+                  >
+                    <Phone size={15} />
+                  </a>
+                )}
+                {client.email && (
+                  <a
+                    href={`mailto:${client.email}`}
+                    className="p-2 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600"
+                    title="Email"
+                  >
+                    <Mail size={15} />
+                  </a>
+                )}
                 <button onClick={() => openEdit(client)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500">
                   <Pencil size={15} />
                 </button>

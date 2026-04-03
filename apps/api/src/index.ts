@@ -13,6 +13,7 @@ import { saleRoutes } from './routes/sales'
 import { purchaseRoutes } from './routes/purchases'
 import { financeRoutes } from './routes/finance'
 import { dashboardRoutes } from './routes/dashboard'
+import { userRoutes } from './routes/users'
 
 const app = Fastify({ logger: process.env.NODE_ENV !== 'production' })
 
@@ -49,6 +50,7 @@ app.register(saleRoutes, { prefix: '/api/sales' })
 app.register(purchaseRoutes, { prefix: '/api/purchases' })
 app.register(financeRoutes, { prefix: '/api/finance' })
 app.register(dashboardRoutes, { prefix: '/api/dashboard' })
+app.register(userRoutes, { prefix: '/api/users' })
 
 // ── Health check ─────────────────────────────────────────────
 app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))

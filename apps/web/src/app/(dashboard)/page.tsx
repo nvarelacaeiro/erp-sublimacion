@@ -1,14 +1,25 @@
 'use client'
+import { useState } from 'react'
 import { useDashboard } from '@/hooks/useSales'
 import { formatCurrency } from '@/lib/utils'
 import {
   TrendingUp, TrendingDown, DollarSign, FileText,
-  AlertTriangle, Clock, ArrowRight,
+  AlertTriangle, Clock, ArrowRight, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import Link from 'next/link'
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
+import { addDays, subDays, addMonths, subMonths, format, startOfDay, endOfDay } from 'date-fns'
+import { es } from 'date-fns/locale'
+
+const RANGES = [
+  { value: 'today', label: 'Hoy' },
+  { value: 'week', label: 'Semana' },
+  { value: 'month', label: 'Mes' },
+  { value: '3months', label: '3 meses' },
+  { value: 'year', label: 'Año' },
+]
 
 function StatCard({
   label, value, sub, icon: Icon, color, href,
@@ -37,8 +48,70 @@ function StatCard({
   return href ? <Link href={href}>{content}</Link> : content
 }
 
+function periodLabel(range: string, navDate: Date): string {
+  if (range === 'today') return format(navDate, "EEEE dd/MM/yyyy", { locale: es })
+  if (range === 'week') {
+    const from = subDays(navDate, 6)
+    return `${format(from, 'dd/MM')} – ${format(navDate, 'dd/MM/yyyy')}`
+  }
+  if (range === 'month') return format(navDate, 'MMMM yyyy', { locale: es })
+  if (range === '3months') {
+    const from = subMonths(navDate, 3)
+    return `${format(from, 'MM/yyyy')} – ${format(navDate, 'MM/yyyy')}`
+  }
+  if (range === 'year') return format(navDate, 'yyyy')
+  return ''
+}
+
 export default function DashboardPage() {
-  const { data, isLoading } = useDashboard()
+  const [range, setRange] = useState('month')
+  const [navDate, setNavDate] = useState(new Date())
+
+  function getParams() {
+    if (range === 'today') {
+      const d = format(navDate, 'yyyy-MM-dd')
+      return { range: 'custom', from: d, to: d }
+    }
+    if (range === 'week') {
+      const to = format(navDate, 'yyyy-MM-dd')
+      const from = format(subDays(navDate, 6), 'yyyy-MM-dd')
+      return { range: 'custom', from, to }
+    }
+    if (range === 'month') {
+      const d = format(navDate, 'yyyy-MM-dd')
+      return { range: 'month', from: d, to: d }
+    }
+    if (range === '3months') {
+      const to = format(navDate, 'yyyy-MM-dd')
+      const from = format(subMonths(navDate, 3), 'yyyy-MM-dd')
+      return { range: 'custom', from, to }
+    }
+    if (range === 'year') {
+      const to = format(navDate, 'yyyy-MM-dd')
+      const from = format(new Date(navDate.getFullYear(), 0, 1), 'yyyy-MM-dd')
+      return { range: 'custom', from, to }
+    }
+    return { range }
+  }
+
+  function navigate(dir: 'prev' | 'next') {
+    setNavDate(prev => {
+      if (range === 'today') return dir === 'prev' ? subDays(prev, 1) : addDays(prev, 1)
+      if (range === 'week') return dir === 'prev' ? subDays(prev, 7) : addDays(prev, 7)
+      if (range === 'month') return dir === 'prev' ? subMonths(prev, 1) : addMonths(prev, 1)
+      if (range === '3months') return dir === 'prev' ? subMonths(prev, 3) : addMonths(prev, 3)
+      if (range === 'year') {
+        const y = prev.getFullYear() + (dir === 'prev' ? -1 : 1)
+        return new Date(y, 11, 31)
+      }
+      return prev
+    })
+  }
+
+  const isToday = format(navDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
+  const isFuture = navDate > new Date()
+
+  const { data, isLoading } = useDashboard(getParams())
 
   if (isLoading) {
     return (
@@ -53,11 +126,50 @@ export default function DashboardPage() {
   const d = data ?? {}
 
   return (
-    <div className="p-4 md:p-6 space-y-5">
+    <div className="p-4 md:p-6 space-y-4">
+      {/* Selector de rango */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex bg-gray-100 rounded-lg p-1 gap-0.5">
+          {RANGES.map(r => (
+            <button
+              key={r.value}
+              onClick={() => { setRange(r.value); setNavDate(new Date()) }}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                range === r.value
+                  ? 'bg-white text-primary-700 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Navegación */}
+        <div className="flex items-center gap-1 ml-auto">
+          <button
+            onClick={() => navigate('prev')}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <span className="text-sm font-medium text-gray-700 min-w-[120px] text-center capitalize">
+            {periodLabel(range, navDate)}
+          </span>
+          <button
+            onClick={() => navigate('next')}
+            disabled={isFuture}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-600 disabled:opacity-30"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      </div>
+
       {/* Stats grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <StatCard
-          label="Ventas del mes"
+          label="Ventas"
           value={formatCurrency(d.salesThisMonth ?? 0)}
           sub={`${d.salesCount ?? 0} operaciones`}
           icon={DollarSign}
@@ -77,10 +189,10 @@ export default function DashboardPage() {
           color="bg-red-50 text-red-600"
         />
         <StatCard
-          label="Ganancia estimada"
+          label="Ganancia"
           value={formatCurrency(d.estimatedProfit ?? 0)}
           icon={TrendingUp}
-          color="bg-emerald-50 text-emerald-600"
+          color={(d.estimatedProfit ?? 0) >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}
         />
         <StatCard
           label="A cobrar"
@@ -100,9 +212,8 @@ export default function DashboardPage() {
 
       {/* Gráfico + Stock bajo */}
       <div className="grid md:grid-cols-3 gap-4">
-        {/* Gráfico de ingresos vs egresos */}
         <div className="md:col-span-2 bg-white rounded-xl border border-gray-200 p-4 md:p-5">
-          <h2 className="text-sm font-semibold text-gray-900 mb-4">Ingresos vs Egresos (últimos 6 meses)</h2>
+          <h2 className="text-sm font-semibold text-gray-900 mb-4">Ingresos vs Egresos</h2>
           {d.chart?.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={d.chart}>
@@ -127,7 +238,7 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           ) : (
             <div className="h-48 flex items-center justify-center text-sm text-gray-400">
-              Sin datos aún
+              Sin movimientos en este período
             </div>
           )}
         </div>
@@ -136,7 +247,7 @@ export default function DashboardPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-4 md:p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-semibold text-gray-900">Stock bajo</h2>
-            <Link href="/products?lowStock=true" className="text-xs text-primary-600 hover:underline">
+            <Link href="/products" className="text-xs text-primary-600 hover:underline">
               Ver todos
             </Link>
           </div>
@@ -166,7 +277,7 @@ export default function DashboardPage() {
       {d.recentSales?.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-200">
           <div className="flex items-center justify-between px-4 md:px-5 py-4 border-b border-gray-100">
-            <h2 className="text-sm font-semibold text-gray-900">Últimas ventas</h2>
+            <h2 className="text-sm font-semibold text-gray-900">Ventas del período</h2>
             <Link href="/sales" className="text-xs text-primary-600 hover:underline">Ver todas</Link>
           </div>
           <div className="divide-y divide-gray-50">

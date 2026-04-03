@@ -6,13 +6,15 @@ import { Button } from '@/components/ui/Button'
 
 const PAGE_TITLES: Record<string, { title: string; action?: { label: string; href: string } }> = {
   '/': { title: 'Dashboard' },
-  '/products': { title: 'Productos', action: { label: 'Nuevo', href: '/products/new' } },
-  '/clients': { title: 'Clientes', action: { label: 'Nuevo', href: '/clients/new' } },
-  '/suppliers': { title: 'Proveedores', action: { label: 'Nuevo', href: '/suppliers/new' } },
-  '/purchases': { title: 'Compras', action: { label: 'Nueva', href: '/purchases/new' } },
-  '/sales': { title: 'Ventas', action: { label: 'Nueva', href: '/sales/new' } },
+  '/products': { title: 'Productos' },
+  '/clients': { title: 'Clientes' },
+  '/suppliers': { title: 'Proveedores' },
+  '/purchases': { title: 'Compras' },
+  '/sales': { title: 'Ventas', action: { label: 'Nueva venta', href: '/sales/new' } },
   '/quotes': { title: 'Presupuestos', action: { label: 'Nuevo', href: '/quotes/new' } },
   '/finance': { title: 'Finanzas' },
+  '/categories': { title: 'Categorías' },
+  '/users': { title: 'Usuarios' },
 }
 
 export function TopBar() {

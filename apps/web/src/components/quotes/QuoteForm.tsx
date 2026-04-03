@@ -30,6 +30,7 @@ export function QuoteForm({ onSave, onCancel, loading }: QuoteFormProps) {
   ])
   const [productSearch, setProductSearch] = useState<Record<number, string>>({})
   const [showProductSearch, setShowProductSearch] = useState<number | null>(null)
+  const [formError, setFormError] = useState('')
 
   const { data: clients = [] } = useClients(clientSearch || undefined)
   const { data: products = [] } = useProducts({
@@ -65,18 +66,21 @@ export function QuoteForm({ onSave, onCancel, loading }: QuoteFormProps) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (items.some(i => !i.description || i.quantity <= 0)) return
-
-    await onSave({
-      clientId: clientId || null,
-      discount,
-      notes: notes || null,
-      items: items.map(i => ({
-        productId: i.productId || null,
-        description: i.description,
-        quantity: i.quantity,
-        unitPrice: i.unitPrice,
-      })),
-    })
+    try {
+      await onSave({
+        clientId: clientId || null,
+        discount,
+        notes: notes || null,
+        items: items.map(i => ({
+          productId: i.productId || null,
+          description: i.description,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+        })),
+      })
+    } catch (err: any) {
+      setFormError(err?.message ?? 'Error al guardar el presupuesto')
+    }
   }
 
   return (
@@ -164,10 +168,10 @@ export function QuoteForm({ onSave, onCancel, loading }: QuoteFormProps) {
                   <label className="text-xs text-gray-500 mb-1 block">Cantidad</label>
                   <input
                     type="number"
-                    min="0.001"
-                    step="0.001"
+                    min="1"
+                    step="1"
                     value={item.quantity}
-                    onChange={e => updateItem(idx, 'quantity', Number(e.target.value))}
+                    onChange={e => updateItem(idx, 'quantity', Math.max(1, parseInt(e.target.value) || 1))}
                     className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
                 </div>
@@ -242,6 +246,12 @@ export function QuoteForm({ onSave, onCancel, loading }: QuoteFormProps) {
           className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
         />
       </div>
+
+      {formError && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+          {formError}
+        </div>
+      )}
 
       {/* Botones */}
       <div className="flex gap-3">

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Package, Users, Truck, ShoppingCart,
-  DollarSign, FileText, CreditCard, ChevronLeft, ChevronRight, LogOut,
+  DollarSign, FileText, CreditCard, ChevronLeft, ChevronRight, LogOut, Tag, UserRound,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/auth.store'
@@ -13,12 +13,14 @@ import { useState } from 'react'
 const NAV_ITEMS = [
   { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/products', icon: Package, label: 'Productos' },
+  { href: '/categories', icon: Tag, label: 'Categorías' },
   { href: '/clients', icon: Users, label: 'Clientes' },
   { href: '/suppliers', icon: Truck, label: 'Proveedores' },
   { href: '/purchases', icon: ShoppingCart, label: 'Compras' },
   { href: '/sales', icon: DollarSign, label: 'Ventas' },
   { href: '/quotes', icon: FileText, label: 'Presupuestos' },
   { href: '/finance', icon: CreditCard, label: 'Finanzas' },
+  { href: '/users', icon: UserRound, label: 'Usuarios' },
 ]
 
 export function Sidebar() {

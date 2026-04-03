@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { X, Users, Truck, ShoppingCart, CreditCard, LogOut } from 'lucide-react'
+import { X, Users, Truck, ShoppingCart, CreditCard, LogOut, Tag, UserRound } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthStore } from '@/store/auth.store'
 
@@ -8,7 +8,9 @@ const EXTRA_ITEMS = [
   { href: '/clients', icon: Users, label: 'Clientes' },
   { href: '/suppliers', icon: Truck, label: 'Proveedores' },
   { href: '/purchases', icon: ShoppingCart, label: 'Compras' },
+  { href: '/categories', icon: Tag, label: 'Categorías' },
   { href: '/finance', icon: CreditCard, label: 'Finanzas' },
+  { href: '/users', icon: UserRound, label: 'Usuarios' },
 ]
 
 export function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {

@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useSuppliers, useCreateSupplier, useUpdateSupplier, useDeleteSupplier } from '@/hooks/useSuppliers'
-import { Truck, Search, Pencil, Trash2 } from 'lucide-react'
+import { Truck, Search, Pencil, Trash2, Phone, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
@@ -110,6 +110,26 @@ export default function SuppliersPage() {
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                {s.phone && (
+                  <a
+                    href={`https://wa.me/${s.phone.replace(/\D/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-lg hover:bg-green-50 text-gray-400 hover:text-green-600"
+                    title="WhatsApp"
+                  >
+                    <Phone size={15} />
+                  </a>
+                )}
+                {s.email && (
+                  <a
+                    href={`mailto:${s.email}`}
+                    className="p-2 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600"
+                    title="Email"
+                  >
+                    <Mail size={15} />
+                  </a>
+                )}
                 <button onClick={() => openEdit(s)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500">
                   <Pencil size={15} />
                 </button>
