@@ -130,9 +130,9 @@ function PurchaseForm({
                   updateItem(idx, 'productId', null)
                 }}
                 onFocus={() => setShowProductSearch(idx)}
+                onBlur={() => setTimeout(() => setShowProductSearch(null), 150)}
                 placeholder="Descripción o buscar producto..."
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                required
               />
               {showProductSearch === idx && products.length > 0 && (productSearch[idx] ?? '').length > 0 && (
                 <div className="absolute top-full left-0 right-0 z-20 mt-1 border border-gray-200 rounded-lg bg-white shadow-lg max-h-44 overflow-y-auto">
