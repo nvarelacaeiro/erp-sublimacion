@@ -2,7 +2,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 
 export function usePurchases(params?: { from?: string; to?: string }) {
-  const qs = new URLSearchParams(params as Record<string, string>)
+  const qs = new URLSearchParams()
+  if (params?.from) qs.set('from', params.from)
+  if (params?.to) qs.set('to', params.to)
   return useQuery({
     queryKey: ['purchases', params],
     queryFn: () => api.get<any[]>(`/api/purchases?${qs}`),

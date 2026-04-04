@@ -3,7 +3,9 @@ import { api } from '@/lib/api'
 import type { Sale } from '@erp/shared'
 
 export function useSales(params?: { from?: string; to?: string }) {
-  const qs = new URLSearchParams(params as Record<string, string>)
+  const qs = new URLSearchParams()
+  if (params?.from) qs.set('from', params.from)
+  if (params?.to) qs.set('to', params.to)
   return useQuery({
     queryKey: ['sales', params],
     queryFn: () => api.get<Sale[]>(`/api/sales?${qs}`),
