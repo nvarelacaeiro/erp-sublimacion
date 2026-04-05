@@ -148,7 +148,12 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
   const visibleItems = items.filter(i => !i.toDelete)
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="divide-y divide-gray-100 max-h-[80vh] overflow-y-auto">
+    <form
+      onSubmit={handleSubmit(onSubmit, () => {
+        setFormError('Revisá los campos requeridos antes de guardar.')
+      })}
+      className="divide-y divide-gray-100 max-h-[80vh] overflow-y-auto"
+    >
 
       {/* ── SECCIÓN 1: Datos básicos ──────────────────────────── */}
       <div className="p-5 space-y-4">
@@ -206,6 +211,8 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
         <div className="w-1/2">
           <Input label="Unidad" placeholder="un, kg, m..." {...register('unit')} />
         </div>
+        {/* Hidden price field — kept in DB for compatibility, not shown to user */}
+        <input type="hidden" {...register('price', { valueAsNumber: true })} />
       </div>
 
       {/* ── SECCIÓN 2: Ítems configurables ───────────────────── */}
