@@ -1,14 +1,13 @@
 'use client'
 import { useState } from 'react'
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/hooks/useProducts'
-import { formatCurrency } from '@/lib/utils'
+import { api } from '@/lib/api'
 import { Package, Search, AlertTriangle, Pencil, Trash2, Settings2 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
 import { EmptyState } from '@/components/shared/EmptyState'
-import { ProductForm } from '@/components/products/ProductForm'
+import { ProductForm, type ProductFormExtras } from '@/components/products/ProductForm'
 import type { Product } from '@erp/shared'
 
 export default function ProductsPage() {
@@ -25,9 +24,34 @@ export default function ProductsPage() {
   function openEdit(p: Product) { setSelected(p); setShowForm(true) }
   function closeForm() { setShowForm(false); setSelected(null) }
 
-  async function handleSave(data: any) {
-    if (selected) await updateProduct.mutateAsync(data)
-    else await createProduct.mutateAsync(data)
+  async function handleSave(data: any, extras: ProductFormExtras) {
+    if (selected) {
+      await updateProduct.mutateAsync(data)
+      const productId = selected.id
+      // Delete removed items
+      for (const item of extras.items.filter(i => i.toDelete && i.id)) {
+        await api.delete(`/api/products/${productId}/items/${item.id}`)
+      }
+      // Add new items
+      for (const item of extras.items.filter(i => !i.id && !i.toDelete)) {
+        await api.post(`/api/products/${productId}/items`, {
+          name: item.name, cost: item.cost, type: item.type,
+        })
+      }
+      // Replace all pricing rules
+      await api.put(`/api/products/${productId}/pricing-rules`, { rules: extras.rules })
+    } else {
+      const product = await createProduct.mutateAsync(data) as any
+      const productId = product.id
+      for (const item of extras.items.filter(i => !i.toDelete)) {
+        await api.post(`/api/products/${productId}/items`, {
+          name: item.name, cost: item.cost, type: item.type,
+        })
+      }
+      if (extras.rules.length > 0) {
+        await api.put(`/api/products/${productId}/pricing-rules`, { rules: extras.rules })
+      }
+    }
     closeForm()
   }
 
@@ -79,7 +103,6 @@ export default function ProductsPage() {
                 </div>
                 <div className="text-xs text-gray-500 flex gap-3 mt-0.5">
                   <span>Stock: <strong>{product.stock} {product.unit}</strong></span>
-                  <span>Precio: <strong>{formatCurrency(product.price)}</strong></span>
                   {product.sku && <span className="hidden sm:inline">SKU: {product.sku}</span>}
                 </div>
               </div>
@@ -87,7 +110,7 @@ export default function ProductsPage() {
                 <Link
                   href={`/products/${product.id}`}
                   className="p-2 rounded-lg hover:bg-primary-50 text-gray-400 hover:text-primary-600"
-                  title="Configurar ítems y precios"
+                  title="Vista avanzada"
                 >
                   <Settings2 size={15} />
                 </Link>
@@ -113,10 +136,10 @@ export default function ProductsPage() {
         open={showForm}
         onClose={closeForm}
         title={selected ? 'Editar producto' : 'Nuevo producto'}
-        size="md"
+        size="lg"
       >
         <ProductForm
-          defaultValues={selected ?? undefined}
+          defaultValues={selected ? { ...selected, id: selected.id } : undefined}
           onSave={handleSave}
           onCancel={closeForm}
           loading={createProduct.isPending || updateProduct.isPending}

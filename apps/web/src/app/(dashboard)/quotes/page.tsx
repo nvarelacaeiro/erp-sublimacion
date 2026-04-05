@@ -1,8 +1,10 @@
 'use client'
 import { useState } from 'react'
 import { useQuotes, useConvertQuote, useUpdateQuoteStatus, useDeleteQuote } from '@/hooks/useQuotes'
+import { api } from '@/lib/api'
 import { formatCurrency, formatDate, QUOTE_STATUS_LABELS, QUOTE_STATUS_COLORS } from '@/lib/utils'
-import { FileText, ChevronRight, CheckCircle, XCircle, Trash2 } from 'lucide-react'
+import { openQuotePrintWindow, buildWhatsAppText } from '@/lib/quotePrint'
+import { FileText, CheckCircle, XCircle, Trash2, Download, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/shared/Badge'
@@ -22,6 +24,7 @@ export default function QuotesPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const [convertId, setConvertId] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState('CASH')
+  const [pdfLoading, setPdfLoading] = useState<string | null>(null)
 
   const { data: quotes = [], isLoading } = useQuotes({ status: statusFilter || undefined })
   const convertQuote = useConvertQuote()
@@ -42,6 +45,22 @@ export default function QuotesPage() {
   async function handleDelete(id: string) {
     if (!confirm('¿Eliminar presupuesto?')) return
     await deleteQuote.mutateAsync(id)
+  }
+
+  async function handleDownloadPDF(quoteId: string) {
+    setPdfLoading(quoteId)
+    try {
+      const quote = await api.get<any>(`/api/quotes/${quoteId}`)
+      openQuotePrintWindow(quote)
+    } finally {
+      setPdfLoading(null)
+    }
+  }
+
+  async function handleWhatsApp(quoteId: string) {
+    const quote = await api.get<any>(`/api/quotes/${quoteId}`)
+    const text = buildWhatsAppText(quote)
+    window.open(`https://wa.me/?text=${text}`, '_blank')
   }
 
   return (
@@ -84,9 +103,7 @@ export default function QuotesPage() {
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-gray-900">
-                      #{quote.number}
-                    </span>
+                    <span className="text-sm font-semibold text-gray-900">#{quote.number}</span>
                     <Badge
                       label={QUOTE_STATUS_LABELS[quote.status]}
                       className={QUOTE_STATUS_COLORS[quote.status]}
@@ -101,8 +118,24 @@ export default function QuotesPage() {
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-base font-bold text-gray-900">
-                    {formatCurrency(quote.total)}
+                  <div className="text-base font-bold text-gray-900">{formatCurrency(quote.total)}</div>
+                  {/* PDF + WhatsApp */}
+                  <div className="flex items-center gap-1 mt-1 justify-end">
+                    <button
+                      onClick={() => handleDownloadPDF(quote.id)}
+                      disabled={pdfLoading === quote.id}
+                      title="Descargar PDF"
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 disabled:opacity-40"
+                    >
+                      <Download size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleWhatsApp(quote.id)}
+                      title="Compartir por WhatsApp"
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50"
+                    >
+                      <MessageCircle size={14} />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -110,26 +143,14 @@ export default function QuotesPage() {
               {/* Acciones para pendientes */}
               {quote.status === 'PENDING' && (
                 <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
-                  <Button
-                    size="sm"
-                    onClick={() => setConvertId(quote.id)}
-                    className="flex-1"
-                  >
+                  <Button size="sm" onClick={() => setConvertId(quote.id)} className="flex-1">
                     <CheckCircle size={14} />
                     Aprobar y vender
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleReject(quote.id)}
-                  >
+                  <Button size="sm" variant="ghost" onClick={() => handleReject(quote.id)}>
                     <XCircle size={14} />
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => handleDelete(quote.id)}
-                  >
+                  <Button size="sm" variant="ghost" onClick={() => handleDelete(quote.id)}>
                     <Trash2 size={14} />
                   </Button>
                 </div>
@@ -140,12 +161,7 @@ export default function QuotesPage() {
       )}
 
       {/* Modal: elegir método de pago para convertir */}
-      <Modal
-        open={!!convertId}
-        onClose={() => setConvertId(null)}
-        title="Convertir a venta"
-        size="sm"
-      >
+      <Modal open={!!convertId} onClose={() => setConvertId(null)} title="Convertir a venta" size="sm">
         <div className="p-5 space-y-4">
           <p className="text-sm text-gray-600">
             Seleccioná el método de pago para registrar la venta.
