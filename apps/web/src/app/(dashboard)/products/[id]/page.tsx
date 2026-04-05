@@ -291,8 +291,8 @@ export default function ProductConfigPage() {
             <ItemRow
               key={item.id}
               item={item}
-              onUpdate={(id, data) => updateItem.mutateAsync({ itemId: id, data })}
-              onDelete={(id) => deleteItem.mutateAsync(id)}
+              onUpdate={(id, data) => void updateItem.mutateAsync({ itemId: id, data })}
+              onDelete={(id) => void deleteItem.mutateAsync(id)}
             />
           ))
         )}
