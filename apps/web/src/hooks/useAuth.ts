@@ -15,7 +15,11 @@ export function useAuth() {
   }
 
   async function logout() {
-    await api.post('/api/auth/logout')
+    try {
+      await api.post('/api/auth/logout')
+    } catch {
+      // Ignorar errores del servidor — limpiar sesión local igual
+    }
     clearAuth()
     router.push('/login')
   }
