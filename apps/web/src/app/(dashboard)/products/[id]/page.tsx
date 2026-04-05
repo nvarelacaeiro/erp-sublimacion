@@ -34,8 +34,8 @@ function ItemRow({
   onDelete,
 }: {
   item: ProductItem
-  onUpdate: (id: string, data: Partial<ProductItem>) => Promise<void>
-  onDelete: (id: string) => Promise<void>
+  onUpdate: (id: string, data: Partial<ProductItem>) => void
+  onDelete: (id: string) => void
 }) {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState(item.name)
