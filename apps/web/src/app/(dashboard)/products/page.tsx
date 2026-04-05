@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/hooks/useProducts'
 import { api } from '@/lib/api'
-import { Package, Search, AlertTriangle, Pencil, Trash2, Settings2 } from 'lucide-react'
+import { Package, Search, AlertTriangle, Pencil, Trash2, Settings2, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
@@ -16,6 +16,16 @@ export default function ProductsPage() {
   const [showForm, setShowForm] = useState(false)
 
   const { data: products = [], isLoading } = useProducts({ search: search || undefined })
+
+  const lowStockProducts = products.filter(p => p.stock <= p.minStock && p.minStock > 0)
+
+  function sendStockAlert() {
+    const lines = lowStockProducts.map(
+      p => `• *${p.name}*: stock actual ${p.stock} ${p.unit} (mínimo ${p.minStock} ${p.unit})`,
+    ).join('\n')
+    const text = encodeURIComponent(`🚨 *Alerta de stock bajo*\n\n${lines}\n\n_Por favor reponer lo antes posible._`)
+    window.open(`https://wa.me/?text=${text}`, '_blank')
+  }
   const createProduct = useCreateProduct()
   const updateProduct = useUpdateProduct(selected?.id ?? '')
   const deleteProduct = useDeleteProduct()
@@ -73,6 +83,17 @@ export default function ProductsPage() {
             className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
         </div>
+        {lowStockProducts.length > 0 && (
+          <button
+            onClick={sendStockAlert}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100"
+            title="Enviar alerta de stock bajo por WhatsApp"
+          >
+            <AlertTriangle size={14} />
+            <span className="hidden sm:inline">{lowStockProducts.length} stock bajo</span>
+            <MessageCircle size={14} />
+          </button>
+        )}
         <Button onClick={openCreate}>Nuevo</Button>
       </div>
 

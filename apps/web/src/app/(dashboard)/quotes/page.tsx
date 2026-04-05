@@ -4,7 +4,7 @@ import { useQuotes, useConvertQuote, useUpdateQuoteStatus, useDeleteQuote } from
 import { api } from '@/lib/api'
 import { formatCurrency, formatDate, QUOTE_STATUS_LABELS, QUOTE_STATUS_COLORS } from '@/lib/utils'
 import { openQuotePrintWindow, buildWhatsAppText } from '@/lib/quotePrint'
-import { FileText, CheckCircle, XCircle, Trash2, Download, MessageCircle } from 'lucide-react'
+import { FileText, CheckCircle, XCircle, Trash2, Download, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/shared/Badge'
@@ -25,6 +25,8 @@ export default function QuotesPage() {
   const [convertId, setConvertId] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState('CASH')
   const [pdfLoading, setPdfLoading] = useState<string | null>(null)
+  const [convertError, setConvertError] = useState('')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const { data: quotes = [], isLoading } = useQuotes({ status: statusFilter || undefined })
   const convertQuote = useConvertQuote()
@@ -33,8 +35,13 @@ export default function QuotesPage() {
 
   async function handleConvert() {
     if (!convertId) return
-    await convertQuote.mutateAsync({ id: convertId, paymentMethod })
-    setConvertId(null)
+    setConvertError('')
+    try {
+      await convertQuote.mutateAsync({ id: convertId, paymentMethod })
+      setConvertId(null)
+    } catch (err: any) {
+      setConvertError(err?.message ?? 'Error al confirmar la venta')
+    }
   }
 
   async function handleReject(id: string) {
@@ -117,10 +124,16 @@ export default function QuotesPage() {
                     {quote.validUntil && ` · Vence ${formatDate(quote.validUntil)}`}
                   </div>
                 </div>
-                <div className="text-right shrink-0">
+                <div className="text-right shrink-0 flex flex-col items-end gap-1">
                   <div className="text-base font-bold text-gray-900">{formatCurrency(quote.total)}</div>
-                  {/* PDF + WhatsApp */}
-                  <div className="flex items-center gap-1 mt-1 justify-end">
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setExpandedId(expandedId === quote.id ? null : quote.id)}
+                      title="Ver detalle"
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                    >
+                      {expandedId === quote.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </button>
                     <button
                       onClick={() => handleDownloadPDF(quote.id)}
                       disabled={pdfLoading === quote.id}
@@ -139,6 +152,30 @@ export default function QuotesPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Detalle expandible */}
+              {expandedId === quote.id && (quote as any).items?.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-gray-100 space-y-1.5">
+                  {(quote as any).items.map((item: any, i: number) => (
+                    <div key={i} className="flex items-start justify-between gap-2 text-sm">
+                      <div className="flex-1 min-w-0">
+                        <span className="text-gray-800">{item.description}</span>
+                        <span className="text-gray-400 ml-1.5">×{item.quantity}</span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-gray-900 font-medium">{formatCurrency(Number(item.unitPrice) * Number(item.quantity))}</div>
+                        <div className="text-xs text-gray-400">{formatCurrency(Number(item.unitPrice))} c/u</div>
+                      </div>
+                    </div>
+                  ))}
+                  {Number((quote as any).discount) > 0 && (
+                    <div className="flex justify-between text-xs text-red-500 pt-1 border-t border-gray-100">
+                      <span>Descuento {(quote as any).discount}%</span>
+                      <span>-{formatCurrency(Number((quote as any).subtotal) * Number((quote as any).discount) / 100)}</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Acciones para pendientes */}
               {quote.status === 'PENDING' && (
@@ -161,7 +198,7 @@ export default function QuotesPage() {
       )}
 
       {/* Modal: elegir método de pago para convertir */}
-      <Modal open={!!convertId} onClose={() => setConvertId(null)} title="Convertir a venta" size="sm">
+      <Modal open={!!convertId} onClose={() => { setConvertId(null); setConvertError('') }} title="Convertir a venta" size="sm">
         <div className="p-5 space-y-4">
           <p className="text-sm text-gray-600">
             Seleccioná el método de pago para registrar la venta.
@@ -172,8 +209,13 @@ export default function QuotesPage() {
             value={paymentMethod}
             onChange={e => setPaymentMethod(e.target.value)}
           />
+          {convertError && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+              {convertError}
+            </div>
+          )}
           <div className="flex gap-3">
-            <Button variant="secondary" onClick={() => setConvertId(null)} className="flex-1">
+            <Button variant="secondary" onClick={() => { setConvertId(null); setConvertError('') }} className="flex-1">
               Cancelar
             </Button>
             <Button onClick={handleConvert} loading={convertQuote.isPending} className="flex-1">

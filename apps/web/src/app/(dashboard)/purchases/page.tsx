@@ -238,9 +238,23 @@ function PurchaseForm({
 
 export default function PurchasesPage() {
   const [showForm, setShowForm] = useState(false)
-  const { data: purchases = [], isLoading } = usePurchases()
+  const [supplierFilter, setSupplierFilter] = useState('')
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
+
+  const { data: purchases = [], isLoading } = usePurchases({
+    from: fromDate || undefined,
+    to: toDate || undefined,
+  })
   const createPurchase = useCreatePurchase()
   const markPaid = useMarkPurchasePaid()
+
+  // Client-side supplier filter
+  const filtered = supplierFilter
+    ? purchases.filter((p: any) =>
+        p.supplierName?.toLowerCase().includes(supplierFilter.toLowerCase()),
+      )
+    : purchases
 
   async function handleSave(data: any) {
     await createPurchase.mutateAsync(data)
@@ -254,7 +268,37 @@ export default function PurchasesPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
-      <div className="flex justify-end mb-4">
+      {/* Filtros */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <div className="relative flex-1 min-w-[160px]">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            value={supplierFilter}
+            onChange={e => setSupplierFilter(e.target.value)}
+            placeholder="Filtrar por proveedor..."
+            className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+        <input
+          type="date"
+          value={fromDate}
+          onChange={e => setFromDate(e.target.value)}
+          className="px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+        />
+        <input
+          type="date"
+          value={toDate}
+          onChange={e => setToDate(e.target.value)}
+          className="px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+        />
+        {(supplierFilter || fromDate || toDate) && (
+          <button
+            onClick={() => { setSupplierFilter(''); setFromDate(''); setToDate('') }}
+            className="text-xs text-gray-500 hover:text-gray-700 px-3 py-2.5 border border-gray-200 rounded-lg hover:bg-gray-50"
+          >
+            Limpiar
+          </button>
+        )}
         <Button onClick={() => setShowForm(true)}>Nueva compra</Button>
       </div>
 
@@ -264,16 +308,16 @@ export default function PurchasesPage() {
             <div key={i} className="h-16 bg-white rounded-xl border animate-pulse" />
           ))}
         </div>
-      ) : purchases.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <EmptyState
           icon={ShoppingCart}
           title="Sin compras"
-          description="Registrá tu primera compra a un proveedor."
+          description={supplierFilter || fromDate || toDate ? 'No hay compras con ese filtro.' : 'Registrá tu primera compra a un proveedor.'}
           action={<Button onClick={() => setShowForm(true)}>Nueva compra</Button>}
         />
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
-          {purchases.map((p: any) => (
+          {filtered.map((p: any) => (
             <div key={p.id} className="flex items-center gap-3 px-4 py-3.5">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">

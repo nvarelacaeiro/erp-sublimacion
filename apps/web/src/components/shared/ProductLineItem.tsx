@@ -205,17 +205,29 @@ export function ProductLineItem({
         </div>
       </div>
 
-      {/* Simple breakdown — only when auto-calculated and has extras */}
-      {autoPrice && result && result.extraCost > 0 && (
+      {/* Pricing tier + breakdown — only when auto-calculated */}
+      {autoPrice && result && (
         <div className="text-xs text-gray-400 border-t border-gray-100 pt-2 space-y-0.5">
-          <div className="flex justify-between">
-            <span>Producto base</span>
-            <span>{formatCurrency(basePrice)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Extras</span>
-            <span>{formatCurrency(extraPrice)}</span>
-          </div>
+          {result.ruleApplied && (
+            <div className="flex items-center gap-1 text-primary-500 font-medium mb-1">
+              <Zap size={10} />
+              <span>
+                Escala {result.ruleApplied.minQty}–{result.ruleApplied.maxQty ?? '∞'} un · {result.margin}% margen
+              </span>
+            </div>
+          )}
+          {result.extraCost > 0 && (
+            <>
+              <div className="flex justify-between">
+                <span>Producto base</span>
+                <span>{formatCurrency(basePrice)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Extras</span>
+                <span>{formatCurrency(extraPrice)}</span>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

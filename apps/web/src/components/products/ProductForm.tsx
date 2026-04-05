@@ -3,11 +3,21 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { productSchema, type ProductInput } from '@erp/shared'
+import { z } from 'zod'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 import { Plus, Trash2, Package, TrendingUp } from 'lucide-react'
+
+// Override categoryId locally: empty string → null (avoids silent cuid() validation failure)
+const localProductSchema = productSchema.extend({
+  categoryId: z.preprocess(
+    v => (v === '' ? null : v),
+    z.string().min(1).nullable().optional(),
+  ),
+  price: z.number().min(0).default(0),
+})
 
 export interface LocalItem {
   id?: string
@@ -49,8 +59,10 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
     enabled: !!productId,
   })
 
+  const [formError, setFormError] = useState('')
+
   const { register, handleSubmit, formState: { errors } } = useForm<ProductInput>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(localProductSchema),
     defaultValues: {
       cost: 0,
       price: 0,
@@ -124,8 +136,13 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
     setRules(prev => prev.map((r, i) => i === idx ? { ...r, [field]: value } : r))
   }
 
-  function onSubmit(data: ProductInput) {
-    return onSave(data, { items, rules })
+  async function onSubmit(data: ProductInput) {
+    setFormError('')
+    try {
+      await onSave(data, { items, rules })
+    } catch (err: any) {
+      setFormError(err?.message ?? 'Error al guardar el producto')
+    }
   }
 
   const visibleItems = items.filter(i => !i.toDelete)
@@ -219,47 +236,51 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
           </div>
         )}
 
-        <div className="flex items-end gap-2">
-          <div className="flex-1">
-            <label className="text-xs text-gray-500 mb-1 block">Nombre del ítem</label>
-            <input
-              value={newItemName}
-              onChange={e => setNewItemName(e.target.value)}
-              placeholder="Ej: Estampa delantera"
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addItem() } }}
-            />
+        <div className="space-y-2">
+          <div className="flex gap-2">
+            <div className="flex-1">
+              <label className="text-xs text-gray-500 mb-1 block">Nombre del ítem</label>
+              <input
+                value={newItemName}
+                onChange={e => setNewItemName(e.target.value)}
+                placeholder="Ej: Estampa delantera"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addItem() } }}
+              />
+            </div>
           </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Costo ($)</label>
-            <input
-              type="number"
-              min="0"
-              step="0.01"
-              value={newItemCost}
-              onChange={e => setNewItemCost(Number(e.target.value))}
-              className="w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Tipo</label>
-            <select
-              value={newItemType}
-              onChange={e => setNewItemType(e.target.value as 'QUANTITY' | 'BOOLEAN')}
-              className="px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+          <div className="flex items-end gap-2">
+            <div className="flex-1">
+              <label className="text-xs text-gray-500 mb-1 block">Costo ($)</label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={newItemCost}
+                onChange={e => setNewItemCost(Number(e.target.value))}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-xs text-gray-500 mb-1 block">Tipo</label>
+              <select
+                value={newItemType}
+                onChange={e => setNewItemType(e.target.value as 'QUANTITY' | 'BOOLEAN')}
+                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="QUANTITY">Cantidad</option>
+                <option value="BOOLEAN">Sí/No</option>
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={addItem}
+              disabled={!newItemName.trim()}
+              className="p-2 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 disabled:opacity-40 shrink-0"
             >
-              <option value="QUANTITY">Cantidad</option>
-              <option value="BOOLEAN">Sí/No</option>
-            </select>
+              <Plus size={16} />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={addItem}
-            disabled={!newItemName.trim()}
-            className="p-2 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 disabled:opacity-40"
-          >
-            <Plus size={16} />
-          </button>
         </div>
       </div>
 
@@ -284,42 +305,52 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
         ) : (
           <div className="space-y-2">
             {rules.map((rule, idx) => (
-              <div key={idx} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-                <span className="text-xs text-gray-500 shrink-0">de</span>
-                <input
-                  type="number" min="1" step="1"
-                  value={rule.minQty}
-                  onChange={e => updateRule(idx, 'minQty', parseInt(e.target.value) || 1)}
-                  className="w-16 px-2 py-1 text-sm border border-gray-200 rounded text-center bg-white"
-                />
-                <span className="text-xs text-gray-500 shrink-0">a</span>
-                <input
-                  type="number" min="1" step="1"
-                  value={rule.maxQty ?? ''}
-                  placeholder="∞"
-                  onChange={e => updateRule(idx, 'maxQty', e.target.value ? parseInt(e.target.value) : null)}
-                  className="w-16 px-2 py-1 text-sm border border-gray-200 rounded text-center bg-white"
-                />
-                <span className="text-xs text-gray-500 shrink-0">un · Margen</span>
-                <input
-                  type="number" min="0" step="1"
-                  value={rule.marginPercentage}
-                  onChange={e => updateRule(idx, 'marginPercentage', Number(e.target.value))}
-                  className="w-20 px-2 py-1 text-sm border border-gray-200 rounded text-right bg-white"
-                />
-                <span className="text-xs text-gray-500 shrink-0">%</span>
-                <button
-                  type="button"
-                  onClick={() => removeRule(idx)}
-                  className="p-1 text-gray-400 hover:text-red-500 rounded ml-auto"
-                >
-                  <Trash2 size={13} />
-                </button>
+              <div key={idx} className="bg-gray-50 rounded-lg px-3 py-2 space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs text-gray-500">Cant. de</span>
+                  <input
+                    type="number" min="1" step="1"
+                    value={rule.minQty}
+                    onChange={e => updateRule(idx, 'minQty', parseInt(e.target.value) || 1)}
+                    className="w-16 px-2 py-1 text-sm border border-gray-200 rounded text-center bg-white"
+                  />
+                  <span className="text-xs text-gray-500">a</span>
+                  <input
+                    type="number" min="1" step="1"
+                    value={rule.maxQty ?? ''}
+                    placeholder="∞"
+                    onChange={e => updateRule(idx, 'maxQty', e.target.value ? parseInt(e.target.value) : null)}
+                    className="w-16 px-2 py-1 text-sm border border-gray-200 rounded text-center bg-white"
+                  />
+                  <span className="text-xs text-gray-500">un</span>
+                  <span className="text-xs text-gray-500 ml-auto sm:ml-0">Margen</span>
+                  <input
+                    type="number" min="0" step="1"
+                    value={rule.marginPercentage}
+                    onChange={e => updateRule(idx, 'marginPercentage', Number(e.target.value))}
+                    className="w-20 px-2 py-1 text-sm border border-gray-200 rounded text-right bg-white"
+                  />
+                  <span className="text-xs text-gray-500">%</span>
+                  <button
+                    type="button"
+                    onClick={() => removeRule(idx)}
+                    className="p-1 text-gray-400 hover:text-red-500 rounded"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      {/* ── Error ────────────────────────────────────────────── */}
+      {formError && (
+        <div className="mx-5 mb-1 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+          {formError}
+        </div>
+      )}
 
       {/* ── Acciones ─────────────────────────────────────────── */}
       <div className="p-5 flex gap-3 bg-white sticky bottom-0">
