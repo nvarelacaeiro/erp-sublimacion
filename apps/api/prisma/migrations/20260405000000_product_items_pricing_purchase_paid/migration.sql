@@ -10,10 +10,6 @@ ALTER TABLE "purchases"
   ADD COLUMN IF NOT EXISTS "paid" BOOLEAN NOT NULL DEFAULT true,
   ADD COLUMN IF NOT EXISTS "paid_at" TIMESTAMP(3);
 
--- Update existing purchases: RECEIVED → PAID (they were already counted as expense)
-UPDATE "purchases" SET "paid" = true, "status" = 'PAID' WHERE "status" = 'RECEIVED';
-UPDATE "purchases" SET "paid" = false WHERE "status" = 'PENDING';
-
 -- CreateTable: product_items
 CREATE TABLE IF NOT EXISTS "product_items" (
   "id"         TEXT NOT NULL,
