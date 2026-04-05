@@ -10,14 +10,16 @@ interface PriceResult {
   ruleApplied: { minQty: number; maxQty: number | null; margin: number } | null
 }
 
-/**
- * Calculates unit price in real time when productId + quantity change.
- * Only fires if the product has pricing rules configured.
- */
-export function useProductPrice(productId: string | null, quantity: number) {
+export function useProductPrice(
+  productId: string | null,
+  quantity: number,
+  selectedItems: { itemId: string; qty: number }[] = [],
+) {
   const [result, setResult] = useState<PriceResult | null>(null)
   const [loading, setLoading] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const selectedKey = JSON.stringify(selectedItems)
 
   useEffect(() => {
     if (!productId || quantity <= 0) {
@@ -32,7 +34,7 @@ export function useProductPrice(productId: string | null, quantity: number) {
       try {
         const data = await api.post<PriceResult>(
           `/api/products/${productId}/calculate-price`,
-          { quantity, selectedItems: [] },
+          { quantity, selectedItems },
         )
         setResult(data)
       } catch {
@@ -45,7 +47,7 @@ export function useProductPrice(productId: string | null, quantity: number) {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
-  }, [productId, quantity])
+  }, [productId, quantity, selectedKey])
 
   return { result, loading }
 }
