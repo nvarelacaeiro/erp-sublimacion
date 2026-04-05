@@ -1,11 +1,129 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useClients } from '@/hooks/useClients'
 import { useProducts } from '@/hooks/useProducts'
+import { useProductPrice } from '@/hooks/useProductPrice'
 import { formatCurrency } from '@/lib/utils'
-import { Plus, Trash2, Search } from 'lucide-react'
+import { Plus, Trash2, Search, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
+
+function LineItemRow({
+  item,
+  idx,
+  items,
+  productSearch,
+  showProductSearch,
+  products,
+  onUpdate,
+  onRemove,
+  onFocusSearch,
+  onChangeSearch,
+  onSelectProduct,
+}: {
+  item: LineItem
+  idx: number
+  items: LineItem[]
+  productSearch: Record<number, string>
+  showProductSearch: number | null
+  products: any[]
+  onUpdate: (idx: number, field: keyof LineItem, value: any) => void
+  onRemove: (idx: number) => void
+  onFocusSearch: (idx: number) => void
+  onChangeSearch: (idx: number, value: string) => void
+  onSelectProduct: (idx: number, product: any) => void
+}) {
+  const { result } = useProductPrice(item.productId, item.quantity)
+  const [autoPrice, setAutoPrice] = useState(false)
+
+  useEffect(() => {
+    if (result?.ruleApplied && result.unitPrice > 0) {
+      onUpdate(idx, 'unitPrice', result.unitPrice)
+      setAutoPrice(true)
+    }
+  }, [result])
+
+  function handlePriceChange(value: number) {
+    setAutoPrice(false)
+    onUpdate(idx, 'unitPrice', value)
+  }
+
+  return (
+    <div className="border border-gray-200 rounded-xl p-3 space-y-2">
+      <div className="relative">
+        <input
+          value={showProductSearch === idx ? (productSearch[idx] ?? '') : item.description}
+          onChange={e => {
+            onFocusSearch(idx)
+            onChangeSearch(idx, e.target.value)
+            onUpdate(idx, 'description', e.target.value)
+            onUpdate(idx, 'productId', null)
+            setAutoPrice(false)
+          }}
+          onFocus={() => onFocusSearch(idx)}
+          onBlur={() => setTimeout(() => onFocusSearch(-1), 150)}
+          placeholder="Descripción o buscar producto..."
+          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+        />
+        {showProductSearch === idx && products.length > 0 && (productSearch[idx] ?? '').length > 0 && (
+          <div className="absolute top-full left-0 right-0 z-20 mt-1 border border-gray-200 rounded-lg bg-white shadow-lg max-h-44 overflow-y-auto">
+            {products.slice(0, 6).map(p => (
+              <button
+                key={p.id}
+                type="button"
+                onMouseDown={() => onSelectProduct(idx, p)}
+                className="w-full text-left px-3 py-2.5 hover:bg-gray-50 flex justify-between text-sm"
+              >
+                <span>{p.name}</span>
+                <span className="text-primary-600 font-medium">{formatCurrency(p.price)}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-3 gap-2 items-end">
+        <div>
+          <label className="text-xs text-gray-500 mb-1 block">Cantidad</label>
+          <input
+            type="number"
+            min="1"
+            step="1"
+            value={item.quantity}
+            onChange={e => onUpdate(idx, 'quantity', Math.max(1, parseInt(e.target.value) || 1))}
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+        <div>
+          <label className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+            Precio unit.
+            {autoPrice && <span className="flex items-center gap-0.5 text-primary-600"><Zap size={10} />Auto</span>}
+          </label>
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={item.unitPrice}
+            onChange={e => handlePriceChange(Number(e.target.value))}
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold">{formatCurrency(item.quantity * item.unitPrice)}</span>
+          {items.length > 1 && (
+            <button
+              type="button"
+              onClick={() => onRemove(idx)}
+              className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500"
+            >
+              <Trash2 size={14} />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const PAYMENT_OPTIONS = [
   { value: 'CASH', label: 'Efectivo' },
@@ -41,12 +159,12 @@ export function SaleForm({
     { productId: null, description: '', quantity: 1, unitPrice: 0 },
   ])
   const [productSearch, setProductSearch] = useState<Record<number, string>>({})
-  const [showProductSearch, setShowProductSearch] = useState<number | null>(null)
+  const [showProductSearch, setShowProductSearch] = useState<number>(-1)
   const [formError, setFormError] = useState('')
 
   const { data: clients = [] } = useClients(clientSearch || undefined)
   const { data: products = [] } = useProducts({
-    search: showProductSearch !== null ? (productSearch[showProductSearch] || undefined) : undefined,
+    search: showProductSearch >= 0 ? (productSearch[showProductSearch] || undefined) : undefined,
   })
 
   const subtotal = items.reduce((s, i) => s + i.quantity * i.unitPrice, 0)
@@ -71,7 +189,7 @@ export function SaleForm({
         ? { ...item, productId: product.id, description: product.name, unitPrice: product.price }
         : item,
     ))
-    setShowProductSearch(null)
+    setShowProductSearch(-1)
     setProductSearch(prev => ({ ...prev, [idx]: '' }))
   }
 
@@ -148,75 +266,20 @@ export function SaleForm({
         </div>
 
         {items.map((item, idx) => (
-          <div key={idx} className="border border-gray-200 rounded-xl p-3 space-y-2">
-            <div className="relative">
-              <input
-                value={showProductSearch === idx ? (productSearch[idx] ?? '') : item.description}
-                onChange={e => {
-                  setShowProductSearch(idx)
-                  setProductSearch(prev => ({ ...prev, [idx]: e.target.value }))
-                  updateItem(idx, 'description', e.target.value)
-                  updateItem(idx, 'productId', null)
-                }}
-                onFocus={() => setShowProductSearch(idx)}
-                onBlur={() => setTimeout(() => setShowProductSearch(null), 150)}
-                placeholder="Descripción o buscar producto..."
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-              {showProductSearch === idx && products.length > 0 && (productSearch[idx] ?? '').length > 0 && (
-                <div className="absolute top-full left-0 right-0 z-20 mt-1 border border-gray-200 rounded-lg bg-white shadow-lg max-h-44 overflow-y-auto">
-                  {products.slice(0, 6).map(p => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onMouseDown={() => selectProduct(idx, p)}
-                      className="w-full text-left px-3 py-2.5 hover:bg-gray-50 flex justify-between text-sm"
-                    >
-                      <span>{p.name}</span>
-                      <span className="text-primary-600 font-medium">{formatCurrency(p.price)}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 items-end">
-              <div>
-                <label className="text-xs text-gray-500 mb-1 block">Cantidad</label>
-                <input
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={item.quantity}
-                  onChange={e => updateItem(idx, 'quantity', Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-gray-500 mb-1 block">Precio unit.</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={item.unitPrice}
-                  onChange={e => updateItem(idx, 'unitPrice', Number(e.target.value))}
-                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold">{formatCurrency(item.quantity * item.unitPrice)}</span>
-                {items.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeItem(idx)}
-                    className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
+          <LineItemRow
+            key={idx}
+            item={item}
+            idx={idx}
+            items={items}
+            productSearch={productSearch}
+            showProductSearch={showProductSearch}
+            products={products}
+            onUpdate={updateItem}
+            onRemove={removeItem}
+            onFocusSearch={setShowProductSearch}
+            onChangeSearch={(i, v) => setProductSearch(prev => ({ ...prev, [i]: v }))}
+            onSelectProduct={selectProduct}
+          />
         ))}
       </div>
 

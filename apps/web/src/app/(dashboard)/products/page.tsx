@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/hooks/useProducts'
 import { formatCurrency } from '@/lib/utils'
-import { Package, Search, AlertTriangle, Pencil, Trash2 } from 'lucide-react'
+import { Package, Search, AlertTriangle, Pencil, Trash2, Settings2 } from 'lucide-react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Modal } from '@/components/ui/Modal'
@@ -83,6 +84,13 @@ export default function ProductsPage() {
                 </div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                <Link
+                  href={`/products/${product.id}`}
+                  className="p-2 rounded-lg hover:bg-primary-50 text-gray-400 hover:text-primary-600"
+                  title="Configurar ítems y precios"
+                >
+                  <Settings2 size={15} />
+                </Link>
                 <button
                   onClick={() => openEdit(product)}
                   className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"

@@ -22,3 +22,14 @@ export function useCreatePurchase() {
     },
   })
 }
+
+export function useMarkPurchasePaid() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => api.patch(`/api/purchases/${id}/pay`, {}),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['purchases'] })
+      qc.invalidateQueries({ queryKey: ['dashboard'] })
+    },
+  })
+}

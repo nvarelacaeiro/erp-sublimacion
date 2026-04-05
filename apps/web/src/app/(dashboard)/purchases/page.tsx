@@ -1,10 +1,10 @@
 'use client'
 import { useState } from 'react'
-import { usePurchases, useCreatePurchase } from '@/hooks/usePurchases'
+import { usePurchases, useCreatePurchase, useMarkPurchasePaid } from '@/hooks/usePurchases'
 import { useSuppliers } from '@/hooks/useSuppliers'
 import { useProducts } from '@/hooks/useProducts'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { ShoppingCart, Plus, Trash2, Search } from 'lucide-react'
+import { ShoppingCart, Plus, Trash2, Search, CheckCircle, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -27,17 +27,18 @@ function PurchaseForm({
 }) {
   const [supplierId, setSupplierId] = useState('')
   const [supplierSearch, setSupplierSearch] = useState('')
+  const [paid, setPaid] = useState(true)
   const [notes, setNotes] = useState('')
   const [items, setItems] = useState<PurchaseItem[]>([
     { productId: null, description: '', quantity: 1, unitCost: 0 },
   ])
   const [productSearch, setProductSearch] = useState<Record<number, string>>({})
-  const [showProductSearch, setShowProductSearch] = useState<number | null>(null)
+  const [showProductSearch, setShowProductSearch] = useState<number>(-1)
   const [formError, setFormError] = useState('')
 
   const { data: suppliers = [] } = useSuppliers(supplierSearch || undefined)
   const { data: products = [] } = useProducts({
-    search: showProductSearch !== null ? (productSearch[showProductSearch] || undefined) : undefined,
+    search: showProductSearch >= 0 ? (productSearch[showProductSearch] || undefined) : undefined,
   })
 
   const total = items.reduce((s, i) => s + i.quantity * i.unitCost, 0)
@@ -52,7 +53,7 @@ function PurchaseForm({
         ? { ...item, productId: product.id, description: product.name, unitCost: product.cost }
         : item,
     ))
-    setShowProductSearch(null)
+    setShowProductSearch(-1)
     setProductSearch(prev => ({ ...prev, [idx]: '' }))
   }
 
@@ -62,6 +63,7 @@ function PurchaseForm({
     try {
       await onSave({
         supplierId: supplierId || null,
+        paid,
         notes: notes || null,
         items: items.map(i => ({
           productId: i.productId || null,
@@ -130,7 +132,7 @@ function PurchaseForm({
                   updateItem(idx, 'productId', null)
                 }}
                 onFocus={() => setShowProductSearch(idx)}
-                onBlur={() => setTimeout(() => setShowProductSearch(null), 150)}
+                onBlur={() => setTimeout(() => setShowProductSearch(-1), 150)}
                 placeholder="Descripción o buscar producto..."
                 className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
@@ -187,12 +189,26 @@ function PurchaseForm({
         ))}
       </div>
 
-      {/* Total */}
-      <div className="bg-gray-50 rounded-xl p-4">
+      {/* Total + estado de pago */}
+      <div className="bg-gray-50 rounded-xl p-4 space-y-3">
         <div className="flex justify-between text-base font-bold text-gray-900">
           <span>Total</span>
           <span>{formatCurrency(total)}</span>
         </div>
+        <label className="flex items-center gap-2 cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={paid}
+            onChange={e => setPaid(e.target.checked)}
+            className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+          />
+          <span className="text-sm text-gray-700">Compra pagada (genera egreso inmediato)</span>
+        </label>
+        {!paid && (
+          <p className="text-xs text-amber-600">
+            La compra quedará pendiente. Podés marcarla como pagada después desde el listado.
+          </p>
+        )}
       </div>
 
       <div>
@@ -224,10 +240,16 @@ export default function PurchasesPage() {
   const [showForm, setShowForm] = useState(false)
   const { data: purchases = [], isLoading } = usePurchases()
   const createPurchase = useCreatePurchase()
+  const markPaid = useMarkPurchasePaid()
 
   async function handleSave(data: any) {
     await createPurchase.mutateAsync(data)
     setShowForm(false)
+  }
+
+  async function handleMarkPaid(id: string) {
+    if (!confirm('¿Marcar esta compra como pagada? Se registrará un egreso.')) return
+    await markPaid.mutateAsync(id)
   }
 
   return (
@@ -259,11 +281,29 @@ export default function PurchasesPage() {
                   {p.supplierName && (
                     <span className="text-sm text-gray-600">{p.supplierName}</span>
                   )}
+                  {p.status === 'PENDING' ? (
+                    <span className="flex items-center gap-0.5 text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
+                      <Clock size={10} /> Pendiente
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-0.5 text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">
+                      <CheckCircle size={10} /> Pagada
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs text-gray-400 mt-0.5">{formatDate(p.date)}</div>
               </div>
-              <div className="text-sm font-bold text-gray-900 shrink-0">
-                {formatCurrency(p.total)}
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-sm font-bold text-gray-900">{formatCurrency(p.total)}</span>
+                {p.status === 'PENDING' && (
+                  <button
+                    onClick={() => handleMarkPaid(p.id)}
+                    disabled={markPaid.isPending}
+                    className="text-xs px-2 py-1 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 disabled:opacity-50"
+                  >
+                    Marcar pagada
+                  </button>
+                )}
               </div>
             </div>
           ))}

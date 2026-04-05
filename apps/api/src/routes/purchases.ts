@@ -1,11 +1,15 @@
 import { FastifyInstance } from 'fastify'
 import { purchaseSchema } from '../shared'
+import { z } from 'zod'
 import { MovementRefType, TransactionType, TransactionRefType } from '@prisma/client'
 import { prisma } from '../lib/prisma'
-import { handleError, NotFoundError } from '../lib/errors'
+import { handleError, NotFoundError, AppError } from '../lib/errors'
 import { getNextNumber } from '../services/numbering.service'
 import { increaseStock } from '../services/stock.service'
 import { createTransaction, createAccountPayable } from '../services/finance.service'
+
+// Cast to any so new enum value 'PAID' compiles before prisma generate runs on Railway
+const db = prisma as any
 
 export async function purchaseRoutes(app: FastifyInstance) {
   const authenticate = { preHandler: [app.authenticate] }
@@ -14,12 +18,13 @@ export async function purchaseRoutes(app: FastifyInstance) {
   app.get('/', authenticate, async (request, reply) => {
     try {
       const { companyId } = request.user as any
-      const { supplierId, from, to } = request.query as any
+      const { supplierId, from, to, status } = request.query as any
 
       const purchases = await prisma.purchase.findMany({
         where: {
           companyId,
           ...(supplierId && { supplierId }),
+          ...(status && { status }),
           ...((from || to) && {
             date: {
               ...(from && { gte: new Date(from) }),
@@ -40,8 +45,8 @@ export async function purchaseRoutes(app: FastifyInstance) {
           ...p,
           subtotal: Number(p.subtotal),
           total: Number(p.total),
-          supplierName: p.supplier?.name ?? null,
-          userName: p.user.name,
+          supplierName: (p as any).supplier?.name ?? null,
+          userName: (p as any).user.name,
         })),
       })
     } catch (err) {
@@ -71,7 +76,7 @@ export async function purchaseRoutes(app: FastifyInstance) {
           ...purchase,
           subtotal: Number(purchase.subtotal),
           total: Number(purchase.total),
-          items: purchase.items.map(i => ({
+          items: (purchase as any).items.map((i: any) => ({
             ...i,
             quantity: Number(i.quantity),
             unitCost: Number(i.unitCost),
@@ -84,11 +89,14 @@ export async function purchaseRoutes(app: FastifyInstance) {
     }
   })
 
-  // POST /api/purchases  ← impacta stock + finanzas automáticamente
+  // POST /api/purchases
   app.post('/', authenticate, async (request, reply) => {
     try {
       const { companyId, id: userId } = request.user as any
-      const input = purchaseSchema.parse(request.body)
+
+      const input = purchaseSchema
+        .extend({ paid: z.boolean().default(true) })
+        .parse(request.body)
 
       const subtotal = input.items.reduce((sum, i) => sum + i.quantity * i.unitCost, 0)
       const total = subtotal
@@ -96,13 +104,16 @@ export async function purchaseRoutes(app: FastifyInstance) {
       const purchase = await prisma.$transaction(async (tx) => {
         const number = await getNextNumber(tx as any, companyId, 'purchases')
 
-        const newPurchase = await tx.purchase.create({
+        const newPurchase = await (tx as any).purchase.create({
           data: {
             companyId,
             userId,
             supplierId: input.supplierId ?? null,
             number,
             date: input.date ? new Date(input.date) : new Date(),
+            paid: input.paid,
+            status: input.paid ? 'PAID' : 'PENDING',
+            paidAt: input.paid ? new Date() : null,
             subtotal,
             total,
             notes: input.notes ?? null,
@@ -119,39 +130,39 @@ export async function purchaseRoutes(app: FastifyInstance) {
           include: { items: true },
         })
 
-        // Aumentar stock
+        // Siempre aumentar stock (se recibió la mercadería)
         await increaseStock(
           tx as any,
           companyId,
-          newPurchase.items.map(i => ({ productId: i.productId, quantity: Number(i.quantity) })),
+          newPurchase.items.map((i: any) => ({ productId: i.productId, quantity: Number(i.quantity) })),
           MovementRefType.PURCHASE,
           newPurchase.id,
         )
 
-        // Actualizar costo del producto (precio costo más reciente)
+        // Actualizar costo del producto
         for (const item of newPurchase.items) {
-          if (item.productId) {
-            await tx.product.update({
-              where: { id: item.productId },
-              data: { cost: item.unitCost },
+          if ((item as any).productId) {
+            await (tx as any).product.update({
+              where: { id: (item as any).productId },
+              data: { cost: (item as any).unitCost },
             })
           }
         }
 
-        // Transacción financiera de egreso
-        await createTransaction(tx as any, {
-          companyId,
-          type: TransactionType.EXPENSE,
-          category: 'Compra',
-          amount: total,
-          description: `Compra #${number}`,
-          refType: TransactionRefType.PURCHASE,
-          refId: newPurchase.id,
-          purchaseId: newPurchase.id,
-        })
-
-        // Cuenta a pagar si hay proveedor
-        if (input.supplierId) {
+        if (input.paid) {
+          // Compra pagada → egreso inmediato
+          await createTransaction(tx as any, {
+            companyId,
+            type: TransactionType.EXPENSE,
+            category: 'Compra',
+            amount: total,
+            description: `Compra #${number}`,
+            refType: TransactionRefType.PURCHASE,
+            refId: newPurchase.id,
+            purchaseId: newPurchase.id,
+          })
+        } else if (input.supplierId) {
+          // Compra pendiente con proveedor → cuenta a pagar, sin egreso
           await createAccountPayable(tx as any, {
             companyId,
             supplierId: input.supplierId,
@@ -164,6 +175,54 @@ export async function purchaseRoutes(app: FastifyInstance) {
       })
 
       return reply.code(201).send({ data: purchase })
+    } catch (err) {
+      return handleError(reply, err)
+    }
+  })
+
+  // PATCH /api/purchases/:id/pay  — marcar compra pendiente como pagada
+  app.patch('/:id/pay', authenticate, async (request, reply) => {
+    try {
+      const { companyId } = request.user as any
+      const { id } = request.params as any
+
+      const purchase = await db.purchase.findFirst({
+        where: { id, companyId },
+        include: { accountsPay: true },
+      })
+      if (!purchase) throw new NotFoundError('Compra')
+      if (purchase.status === 'PAID') throw new AppError('La compra ya está pagada')
+
+      await prisma.$transaction(async (tx) => {
+        await (tx as any).purchase.update({
+          where: { id },
+          data: { paid: true, status: 'PAID', paidAt: new Date() },
+        })
+
+        await createTransaction(tx as any, {
+          companyId,
+          type: TransactionType.EXPENSE,
+          category: 'Compra',
+          amount: Number(purchase.total),
+          description: `Pago compra #${purchase.number}`,
+          refType: TransactionRefType.PURCHASE,
+          refId: purchase.id,
+          purchaseId: purchase.id,
+        })
+
+        for (const ap of purchase.accountsPay) {
+          await (tx as any).accountPayable.update({
+            where: { id: ap.id },
+            data: {
+              status: 'PAID',
+              amountPaid: purchase.total,
+              paidAt: new Date(),
+            },
+          })
+        }
+      })
+
+      return reply.send({ data: { message: 'Compra marcada como pagada' } })
     } catch (err) {
       return handleError(reply, err)
     }
