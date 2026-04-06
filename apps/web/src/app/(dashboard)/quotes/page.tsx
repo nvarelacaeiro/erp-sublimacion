@@ -24,7 +24,6 @@ export default function QuotesPage() {
   const [statusFilter, setStatusFilter] = useState('')
   const [convertId, setConvertId] = useState<string | null>(null)
   const [paymentMethod, setPaymentMethod] = useState('CASH')
-  const [pdfLoading, setPdfLoading] = useState<string | null>(null)
   const [convertError, setConvertError] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -54,20 +53,13 @@ export default function QuotesPage() {
     await deleteQuote.mutateAsync(id)
   }
 
-  async function handleDownloadPDF(quoteId: string) {
-    setPdfLoading(quoteId)
-    try {
-      const quote = await api.get<any>(`/api/quotes/${quoteId}`)
-      openQuotePrintWindow(quote)
-    } finally {
-      setPdfLoading(null)
-    }
+  function handleDownloadPDF(quote: any) {
+    openQuotePrintWindow(quote)
   }
 
-  async function handleWhatsApp(quoteId: string) {
-    const quote = await api.get<any>(`/api/quotes/${quoteId}`)
+  function handleWhatsApp(quote: any) {
     const text = buildWhatsAppText(quote)
-    window.open(`https://wa.me/?text=${text}`, '_blank')
+    window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -135,15 +127,14 @@ export default function QuotesPage() {
                       {expandedId === quote.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </button>
                     <button
-                      onClick={() => handleDownloadPDF(quote.id)}
-                      disabled={pdfLoading === quote.id}
+                      onClick={() => handleDownloadPDF(quote)}
                       title="Descargar PDF"
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 disabled:opacity-40"
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50"
                     >
                       <Download size={14} />
                     </button>
                     <button
-                      onClick={() => handleWhatsApp(quote.id)}
+                      onClick={() => handleWhatsApp(quote)}
                       title="Compartir por WhatsApp"
                       className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50"
                     >

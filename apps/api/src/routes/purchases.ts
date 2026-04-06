@@ -35,6 +35,7 @@ export async function purchaseRoutes(app: FastifyInstance) {
         include: {
           supplier: { select: { id: true, name: true } },
           user: { select: { id: true, name: true } },
+          items: { select: { description: true, quantity: true, unitCost: true }, orderBy: { id: 'asc' } },
         },
         orderBy: { date: 'desc' },
         take: 100,

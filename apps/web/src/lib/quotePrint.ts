@@ -119,11 +119,14 @@ export function openQuotePrintWindow(quote: any) {
 </body>
 </html>`
 
-  const w = window.open('', '_blank', 'width=900,height=700')
-  if (w) {
-    w.document.write(html)
-    w.document.close()
-  }
+  const blob = new Blob([html], { type: 'text/html' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.target = '_blank'
+  a.rel = 'noopener'
+  a.click()
+  setTimeout(() => URL.revokeObjectURL(url), 10000)
 }
 
 export function buildWhatsAppText(quote: any): string {

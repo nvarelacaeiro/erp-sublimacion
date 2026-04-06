@@ -4,7 +4,7 @@ import { usePurchases, useCreatePurchase, useMarkPurchasePaid } from '@/hooks/us
 import { useSuppliers } from '@/hooks/useSuppliers'
 import { useProducts } from '@/hooks/useProducts'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { ShoppingCart, Plus, Trash2, Search, CheckCircle, Clock } from 'lucide-react'
+import { ShoppingCart, Plus, Trash2, Search, CheckCircle, Clock, ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -241,6 +241,7 @@ export default function PurchasesPage() {
   const [supplierFilter, setSupplierFilter] = useState('')
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const { data: purchases = [], isLoading } = usePurchases({
     from: fromDate || undefined,
@@ -318,37 +319,65 @@ export default function PurchasesPage() {
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
           {filtered.map((p: any) => (
-            <div key={p.id} className="flex items-center gap-3 px-4 py-3.5">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-gray-900">#{p.number}</span>
-                  {p.supplierName && (
-                    <span className="text-sm text-gray-600">{p.supplierName}</span>
+            <div key={p.id} className="px-4 py-3.5">
+              <div className="flex items-center gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-semibold text-gray-900">#{p.number}</span>
+                    {p.supplierName && (
+                      <span className="text-sm text-gray-600">{p.supplierName}</span>
+                    )}
+                    {p.status === 'PENDING' ? (
+                      <span className="flex items-center gap-0.5 text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
+                        <Clock size={10} /> Pendiente
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-0.5 text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">
+                        <CheckCircle size={10} /> Pagada
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-0.5">{formatDate(p.date)}</div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-sm font-bold text-gray-900">{formatCurrency(p.total)}</span>
+                  {p.status === 'PENDING' && (
+                    <button
+                      onClick={() => handleMarkPaid(p.id)}
+                      disabled={markPaid.isPending}
+                      className="text-xs px-2 py-1 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 disabled:opacity-50"
+                    >
+                      Marcar pagada
+                    </button>
                   )}
-                  {p.status === 'PENDING' ? (
-                    <span className="flex items-center gap-0.5 text-xs text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
-                      <Clock size={10} /> Pendiente
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-0.5 text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">
-                      <CheckCircle size={10} /> Pagada
-                    </span>
+                  {p.items?.length > 0 && (
+                    <button
+                      onClick={() => setExpandedId(expandedId === p.id ? null : p.id)}
+                      title="Ver detalle"
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                    >
+                      {expandedId === p.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </button>
                   )}
                 </div>
-                <div className="text-xs text-gray-400 mt-0.5">{formatDate(p.date)}</div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <span className="text-sm font-bold text-gray-900">{formatCurrency(p.total)}</span>
-                {p.status === 'PENDING' && (
-                  <button
-                    onClick={() => handleMarkPaid(p.id)}
-                    disabled={markPaid.isPending}
-                    className="text-xs px-2 py-1 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 disabled:opacity-50"
-                  >
-                    Marcar pagada
-                  </button>
-                )}
-              </div>
+
+              {expandedId === p.id && p.items?.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-gray-100 space-y-1.5">
+                  {p.items.map((item: any, i: number) => (
+                    <div key={i} className="flex items-start justify-between gap-2 text-sm">
+                      <div className="flex-1 min-w-0">
+                        <span className="text-gray-800">{item.description}</span>
+                        <span className="text-gray-400 ml-1.5">×{item.quantity}</span>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-gray-900 font-medium">{formatCurrency(Number(item.unitCost) * Number(item.quantity))}</div>
+                        <div className="text-xs text-gray-400">{formatCurrency(Number(item.unitCost))} c/u</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
