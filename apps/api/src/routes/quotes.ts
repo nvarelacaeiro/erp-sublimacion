@@ -38,7 +38,7 @@ export async function quoteRoutes(app: FastifyInstance) {
         include: {
           client: { select: { id: true, name: true } },
           user: { select: { id: true, name: true } },
-          items: { select: { description: true, quantity: true, unitPrice: true }, orderBy: { createdAt: 'asc' } },
+          items: { select: { description: true, quantity: true, unitPrice: true }, orderBy: { id: 'asc' } },
         },
         orderBy: { date: 'desc' },
         take: 100,
