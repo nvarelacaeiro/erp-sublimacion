@@ -35,14 +35,14 @@ export default function SalesPage() {
           type="date"
           value={from}
           onChange={e => setFrom(e.target.value)}
-          className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="text-sm border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
         />
         <span className="text-sm text-gray-400">a</span>
         <input
           type="date"
           value={to}
           onChange={e => setTo(e.target.value)}
-          className="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="text-sm border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
         />
         {(from || to) && (
           <button
@@ -60,7 +60,7 @@ export default function SalesPage() {
 
       {/* Resumen */}
       {sales.length > 0 && (
-        <div className="bg-primary-50 border border-primary-100 rounded-xl px-4 py-3 mb-4 flex justify-between items-center">
+        <div className="bg-primary-50 dark:bg-primary-600/10 border border-primary-100 dark:border-primary-600/30 rounded-xl px-4 py-3 mb-4 flex justify-between items-center">
           <span className="text-sm text-primary-700 font-medium">
             {sales.filter(s => s.status !== 'CANCELLED').length} ventas
           </span>
@@ -74,7 +74,7 @@ export default function SalesPage() {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-20 bg-white rounded-xl border animate-pulse" />
+            <div key={i} className="h-20 bg-white dark:bg-slate-800 rounded-xl border animate-pulse" />
           ))}
         </div>
       ) : sales.length === 0 ? (
@@ -87,11 +87,11 @@ export default function SalesPage() {
       ) : (
         <div className="space-y-2">
           {sales.map(sale => (
-            <div key={sale.id} className="bg-white rounded-xl border border-gray-200 p-4">
+            <div key={sale.id} className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="text-sm font-semibold text-gray-900">#{sale.number}</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">#{sale.number}</span>
                     <Badge
                       label={SALE_STATUS_LABELS[sale.status]}
                       className={SALE_STATUS_COLORS[sale.status]}
@@ -100,7 +100,7 @@ export default function SalesPage() {
                       {PAYMENT_METHOD_LABELS[sale.paymentMethod]}
                     </span>
                   </div>
-                  <div className="text-sm text-gray-700">
+                  <div className="text-sm text-gray-700 dark:text-slate-300">
                     {sale.clientName ?? 'Sin cliente'}
                   </div>
                   <div className="text-xs text-gray-400 mt-0.5">
@@ -108,7 +108,7 @@ export default function SalesPage() {
                   </div>
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-base font-bold text-gray-900">
+                  <div className="text-base font-bold text-gray-900 dark:text-slate-100">
                     {formatCurrency(sale.total)}
                   </div>
                   {sale.status !== 'CANCELLED' && (

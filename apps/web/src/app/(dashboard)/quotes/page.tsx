@@ -69,7 +69,7 @@ export default function QuotesPage() {
         <select
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
-          className="text-sm border border-gray-300 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+          className="text-sm border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
         >
           <option value="">Todos</option>
           <option value="PENDING">Pendientes</option>
@@ -85,7 +85,7 @@ export default function QuotesPage() {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-20 bg-white rounded-xl border animate-pulse" />
+            <div key={i} className="h-20 bg-white dark:bg-slate-800 rounded-xl border animate-pulse" />
           ))}
         </div>
       ) : quotes.length === 0 ? (
@@ -98,31 +98,31 @@ export default function QuotesPage() {
       ) : (
         <div className="space-y-2">
           {quotes.map(quote => (
-            <div key={quote.id} className="bg-white rounded-xl border border-gray-200 p-4">
+            <div key={quote.id} className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
               <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-gray-900">#{quote.number}</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">#{quote.number}</span>
                     <Badge
                       label={QUOTE_STATUS_LABELS[quote.status]}
                       className={QUOTE_STATUS_COLORS[quote.status]}
                     />
                     {quote.clientName && (
-                      <span className="text-sm text-gray-600 truncate">{quote.clientName}</span>
+                      <span className="text-sm text-gray-600 dark:text-slate-400 truncate">{quote.clientName}</span>
                     )}
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                     {formatDate(quote.date)}
                     {quote.validUntil && ` · Vence ${formatDate(quote.validUntil)}`}
                   </div>
                 </div>
                 <div className="text-right shrink-0 flex flex-col items-end gap-1">
-                  <div className="text-base font-bold text-gray-900">{formatCurrency(quote.total)}</div>
+                  <div className="text-base font-bold text-gray-900 dark:text-slate-100">{formatCurrency(quote.total)}</div>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setExpandedId(expandedId === quote.id ? null : quote.id)}
                       title="Ver detalle"
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:text-slate-200 dark:hover:bg-slate-700"
                     >
                       {expandedId === quote.id ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                     </button>
@@ -146,16 +146,16 @@ export default function QuotesPage() {
 
               {/* Detalle expandible */}
               {expandedId === quote.id && (quote as any).items?.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-gray-100 space-y-1.5">
+                <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700 space-y-1.5">
                   {(quote as any).items.map((item: any, i: number) => (
                     <div key={i} className="flex items-start justify-between gap-2 text-sm">
                       <div className="flex-1 min-w-0">
-                        <span className="text-gray-800">{item.description}</span>
-                        <span className="text-gray-400 ml-1.5">×{item.quantity}</span>
+                        <span className="text-gray-800 dark:text-slate-200">{item.description}</span>
+                        <span className="text-gray-400 dark:text-slate-500 ml-1.5">×{item.quantity}</span>
                       </div>
                       <div className="text-right shrink-0">
-                        <div className="text-gray-900 font-medium">{formatCurrency(Number(item.unitPrice) * Number(item.quantity))}</div>
-                        <div className="text-xs text-gray-400">{formatCurrency(Number(item.unitPrice))} c/u</div>
+                        <div className="text-gray-900 dark:text-slate-100 font-medium">{formatCurrency(Number(item.unitPrice) * Number(item.quantity))}</div>
+                        <div className="text-xs text-gray-400 dark:text-slate-500">{formatCurrency(Number(item.unitPrice))} c/u</div>
                       </div>
                     </div>
                   ))}
@@ -170,7 +170,7 @@ export default function QuotesPage() {
 
               {/* Acciones para pendientes */}
               {quote.status === 'PENDING' && (
-                <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100">
+                <div className="flex gap-2 mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
                   <Button size="sm" onClick={() => setConvertId(quote.id)} className="flex-1">
                     <CheckCircle size={14} />
                     Aprobar y vender
@@ -191,7 +191,7 @@ export default function QuotesPage() {
       {/* Modal: elegir método de pago para convertir */}
       <Modal open={!!convertId} onClose={() => { setConvertId(null); setConvertError('') }} title="Convertir a venta" size="sm">
         <div className="p-5 space-y-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-slate-300">
             Seleccioná el método de pago para registrar la venta.
           </p>
           <Select
@@ -201,7 +201,7 @@ export default function QuotesPage() {
             onChange={e => setPaymentMethod(e.target.value)}
           />
           {convertError && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-lg px-4 py-3">
               {convertError}
             </div>
           )}

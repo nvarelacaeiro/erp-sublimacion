@@ -19,7 +19,7 @@ export function BottomNav() {
 
   return (
     <>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-700 pb-safe">
         <div className="grid grid-cols-5 h-16">
           {BOTTOM_ITEMS.map(({ href, icon: Icon, label }) => {
             const active = href === '/' ? pathname === '/' : pathname.startsWith(href)
@@ -29,7 +29,9 @@ export function BottomNav() {
                 href={href}
                 className={cn(
                   'flex flex-col items-center justify-center gap-0.5 transition-colors',
-                  active ? 'text-primary-600' : 'text-gray-500',
+                  active
+                    ? 'text-primary-600 dark:text-primary-400'
+                    : 'text-gray-500 dark:text-slate-500',
                 )}
               >
                 <Icon size={22} />
@@ -37,18 +39,15 @@ export function BottomNav() {
               </Link>
             )
           })}
-
-          {/* Botón Más */}
           <button
             onClick={() => setMenuOpen(true)}
-            className="flex flex-col items-center justify-center gap-0.5 text-gray-500"
+            className="flex flex-col items-center justify-center gap-0.5 text-gray-500 dark:text-slate-500"
           >
             <Menu size={22} />
             <span className="text-[10px] font-medium">Más</span>
           </button>
         </div>
       </nav>
-
       <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
     </>
   )

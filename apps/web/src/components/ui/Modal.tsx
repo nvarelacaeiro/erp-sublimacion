@@ -22,16 +22,10 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Panel */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
         className={cn(
-          'relative bg-white w-full rounded-t-2xl sm:rounded-xl shadow-xl flex flex-col max-h-[92dvh]',
+          'relative bg-white dark:bg-slate-800 w-full rounded-t-2xl sm:rounded-xl shadow-xl flex flex-col max-h-[92dvh]',
           {
             'sm:max-w-sm': size === 'sm',
             'sm:max-w-lg': size === 'md',
@@ -40,23 +34,18 @@ export function Modal({ open, onClose, title, children, size = 'md' }: ModalProp
           },
         )}
       >
-        {/* Handle mobile */}
         <div className="flex sm:hidden justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-gray-300" />
+          <div className="w-10 h-1 rounded-full bg-gray-300 dark:bg-slate-600" />
         </div>
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b">
-          <h2 className="text-base font-semibold text-gray-900">{title}</h2>
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-slate-700">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-slate-100">{title}</h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500"
+            className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400"
           >
             <X size={18} />
           </button>
         </div>
-
-        {/* Content */}
         <div className="overflow-y-auto flex-1">{children}</div>
       </div>
     </div>

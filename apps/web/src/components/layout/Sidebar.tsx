@@ -10,6 +10,7 @@ import { useAuthStore } from '@/store/auth.store'
 import { useAuth } from '@/hooks/useAuth'
 import { useState } from 'react'
 import { SiTiendaLogo } from './SiTiendaLogo'
+import { ThemeToggle } from './ThemeToggle'
 
 const NAV_ITEMS = [
   { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -33,13 +34,13 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'hidden md:flex flex-col bg-white border-r border-gray-200 transition-all duration-200 shrink-0',
+        'hidden md:flex flex-col bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 transition-all duration-200 shrink-0',
         collapsed ? 'w-16' : 'w-60',
       )}
     >
       {/* Logo */}
       <div className={cn(
-        'flex items-center h-16 border-b border-gray-200 overflow-hidden',
+        'flex items-center h-16 border-b border-gray-200 dark:border-slate-700 overflow-hidden',
         collapsed ? 'justify-center px-2' : 'px-5',
       )}>
         <SiTiendaLogo collapsed={collapsed} />
@@ -56,8 +57,8 @@ export function Sidebar() {
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                 active
-                  ? 'bg-primary-50 text-primary-700'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-600/20 dark:text-primary-400'
+                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
               )}
             >
               <Icon size={18} className="shrink-0" />
@@ -68,23 +69,26 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-gray-200 p-2 space-y-0.5">
+      <div className="border-t border-gray-200 dark:border-slate-700 p-2 space-y-0.5">
         {!collapsed && user && (
-          <div className="px-3 py-2 text-xs text-gray-500 truncate">
-            <div className="font-medium text-gray-700 truncate">{user.name}</div>
+          <div className="px-3 py-2 text-xs text-gray-500 dark:text-slate-400 truncate">
+            <div className="font-medium text-gray-700 dark:text-slate-300 truncate">{user.name}</div>
             <div className="truncate">{user.email}</div>
           </div>
         )}
+        <div className={cn('flex items-center', collapsed ? 'justify-center' : 'px-1')}>
+          <ThemeToggle className="w-full" />
+        </div>
         <button
           onClick={logout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-colors"
         >
           <LogOut size={18} className="shrink-0" />
           {!collapsed && <span>Cerrar sesión</span>}
         </button>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="w-full flex items-center justify-center py-2 text-gray-400 hover:text-gray-600 transition-colors"
+          className="w-full flex items-center justify-center py-2 text-gray-400 dark:text-slate-600 hover:text-gray-600 dark:hover:text-slate-400 transition-colors"
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
