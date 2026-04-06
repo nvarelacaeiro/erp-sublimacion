@@ -29,26 +29,26 @@ export function openQuotePrintWindow(quote: any) {
     .doc-number { font-size: 20px; font-weight: 700; color: #1a1a1a; }
     .doc-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
     .doc-date { font-size: 12px; color: #6b7280; margin-top: 4px; }
-    .divider { border: none; border-top: 2px solid #e5e7eb; margin: 0 0 32px; }
+    .divider { border: none; border-top: 2px solid #ADB79C; margin: 0 0 32px; }
     .client-section { margin-bottom: 32px; }
     .section-label { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
     .client-name { font-size: 16px; font-weight: 600; color: #1a1a1a; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
-    thead tr { background: #f9fafb; }
-    thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #e5e7eb; }
+    thead tr { background: #F0EEE1; }
+    thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; color: #5e6d56; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #ADB79C; }
     thead th.center { text-align: center; }
     thead th.right { text-align: right; }
-    tbody tr { border-bottom: 1px solid #f3f4f6; }
+    tbody tr { border-bottom: 1px solid #EAE4D8; }
     tbody tr:last-child { border-bottom: none; }
     tbody td { padding: 12px; font-size: 13px; color: #374151; vertical-align: top; }
     td.center { text-align: center; }
     td.right { text-align: right; }
     .totals { margin-left: auto; width: 260px; }
     .total-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; color: #6b7280; }
-    .total-row.final { border-top: 2px solid #1a1a1a; margin-top: 8px; padding-top: 12px; font-size: 18px; font-weight: 700; color: #1a1a1a; }
-    .notes { margin-top: 32px; padding: 16px; background: #f9fafb; border-radius: 8px; border-left: 3px solid #4f46e5; }
+    .total-row.final { border-top: 2px solid #ADB79C; margin-top: 8px; padding-top: 12px; font-size: 18px; font-weight: 700; color: #1a1a1a; }
+    .notes { margin-top: 32px; padding: 16px; background: #F0EEE1; border-radius: 8px; border-left: 3px solid #ADB79C; }
     .notes p { font-size: 12px; color: #6b7280; line-height: 1.6; }
-    .footer { margin-top: 48px; text-align: center; font-size: 11px; color: #d1d5db; }
+    .footer { margin-top: 48px; text-align: center; font-size: 11px; color: #ADB79C; }
     @media print {
       body { padding: 32px; }
       @page { margin: 0; size: A4; }

@@ -9,10 +9,10 @@ export function SiTiendaLogo({ className = '', collapsed = false }: SiTiendaLogo
   return (
     <span
       style={{
-        fontFamily: "'Cormorant Garamond', Georgia, 'Times New Roman', serif",
-        fontWeight: 400,
-        letterSpacing: '0.04em',
-        fontSize: '1.35rem',
+        fontFamily: "'Barlow', 'Inter', system-ui, sans-serif",
+        fontWeight: 700,
+        letterSpacing: '0.01em',
+        fontSize: '1.25rem',
         whiteSpace: 'nowrap',
         lineHeight: 1,
       }}

@@ -34,13 +34,13 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'hidden md:flex flex-col bg-white dark:bg-slate-900 border-r border-gray-200 dark:border-slate-700 transition-all duration-200 shrink-0',
+        'hidden md:flex flex-col bg-[#EAE4D8] dark:bg-slate-900 border-r border-[#d4cfc6] dark:border-slate-700 transition-all duration-200 shrink-0',
         collapsed ? 'w-16' : 'w-60',
       )}
     >
       {/* Logo */}
       <div className={cn(
-        'flex items-center h-16 border-b border-gray-200 dark:border-slate-700 overflow-hidden',
+        'flex items-center h-16 border-b border-[#d4cfc6] dark:border-slate-700 overflow-hidden',
         collapsed ? 'justify-center px-2' : 'px-5',
       )}>
         <SiTiendaLogo collapsed={collapsed} />
@@ -57,8 +57,8 @@ export function Sidebar() {
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                 active
-                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-600/20 dark:text-primary-400'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
+                  ? 'bg-[#F0EEE1] text-primary-700 dark:bg-primary-600/20 dark:text-primary-400'
+                  : 'text-gray-700 hover:bg-[#F0EEE1] hover:text-gray-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100',
               )}
             >
               <Icon size={18} className="shrink-0" />
@@ -69,7 +69,7 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-gray-200 dark:border-slate-700 p-2 space-y-0.5">
+      <div className="border-t border-[#d4cfc6] dark:border-slate-700 p-2 space-y-0.5">
         {!collapsed && user && (
           <div className="px-3 py-2 text-xs text-gray-500 dark:text-slate-400 truncate">
             <div className="font-medium text-gray-700 dark:text-slate-300 truncate">{user.name}</div>

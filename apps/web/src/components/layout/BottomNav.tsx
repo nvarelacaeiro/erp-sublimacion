@@ -19,7 +19,7 @@ export function BottomNav() {
 
   return (
     <>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-700 pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#EAE4D8] dark:bg-slate-900 border-t border-[#d4cfc6] dark:border-slate-700 pb-safe">
         <div className="grid grid-cols-5 h-16">
           {BOTTOM_ITEMS.map(({ href, icon: Icon, label }) => {
             const active = href === '/' ? pathname === '/' : pathname.startsWith(href)
