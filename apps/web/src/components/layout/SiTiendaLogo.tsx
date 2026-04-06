@@ -13,11 +13,10 @@ export function SiTiendaLogo({ className = '', collapsed = false }: SiTiendaLogo
         fontWeight: 400,
         letterSpacing: '0.04em',
         fontSize: '1.35rem',
-        color: '#111827',
         whiteSpace: 'nowrap',
         lineHeight: 1,
       }}
-      className={className}
+      className={`text-gray-900 dark:text-slate-100 ${className}`}
       aria-label="sí tienda"
     >
       sí tienda

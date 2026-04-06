@@ -80,7 +80,7 @@ export default function ProductsPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar productos..."
-            className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
           />
         </div>
         {lowStockProducts.length > 0 && (
@@ -101,7 +101,7 @@ export default function ProductsPage() {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-16 bg-white rounded-xl border border-gray-200 animate-pulse" />
+            <div key={i} className="h-16 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 animate-pulse" />
           ))}
         </div>
       ) : products.length === 0 ? (
@@ -112,17 +112,17 @@ export default function ProductsPage() {
           action={<Button onClick={openCreate}>Nuevo producto</Button>}
         />
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 divide-y divide-gray-100 dark:divide-slate-700">
           {products.map(product => (
             <div key={product.id} className="flex items-center gap-3 px-4 py-3.5">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-900 truncate">{product.name}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">{product.name}</span>
                   {product.stock <= product.minStock && (
                     <AlertTriangle size={14} className="text-amber-500 shrink-0" />
                   )}
                 </div>
-                <div className="text-xs text-gray-500 flex gap-3 mt-0.5">
+                <div className="text-xs text-gray-500 dark:text-slate-400 flex gap-3 mt-0.5">
                   <span>Stock: <strong>{product.stock} {product.unit}</strong></span>
                   {product.sku && <span className="hidden sm:inline">SKU: {product.sku}</span>}
                 </div>
@@ -130,20 +130,20 @@ export default function ProductsPage() {
               <div className="flex items-center gap-1 shrink-0">
                 <Link
                   href={`/products/${product.id}`}
-                  className="p-2 rounded-lg hover:bg-primary-50 text-gray-400 hover:text-primary-600"
+                  className="p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/30 text-gray-400 dark:text-slate-500 hover:text-primary-600"
                   title="Vista avanzada"
                 >
                   <Settings2 size={15} />
                 </Link>
                 <button
                   onClick={() => openEdit(product)}
-                  className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400"
                 >
                   <Pencil size={15} />
                 </button>
                 <button
                   onClick={() => handleDelete(product.id)}
-                  className="p-2 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-600"
+                  className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-500 dark:text-slate-400 hover:text-red-600"
                 >
                   <Trash2 size={15} />
                 </button>

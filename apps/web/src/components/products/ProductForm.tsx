@@ -152,12 +152,12 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
       onSubmit={handleSubmit(onSubmit, () => {
         setFormError('Revisá los campos requeridos antes de guardar.')
       })}
-      className="divide-y divide-gray-100 max-h-[80vh] overflow-y-auto"
+      className="divide-y divide-gray-100 dark:divide-slate-700 max-h-[80vh] overflow-y-auto"
     >
 
       {/* ── SECCIÓN 1: Datos básicos ──────────────────────────── */}
       <div className="p-5 space-y-4">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Datos del producto</p>
+        <p className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Datos del producto</p>
 
         <Input
           label="Nombre *"
@@ -169,9 +169,9 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
         <div className="grid grid-cols-2 gap-3">
           <Input label="SKU" placeholder="Ej: CAM-001" {...register('sku')} />
           <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Categoría</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Categoría</label>
             <select
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 dark:text-slate-100 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
               {...register('categoryId')}
             >
               <option value="">Sin categoría</option>
@@ -219,22 +219,22 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
       <div className="p-5 space-y-3">
         <div className="flex items-center gap-2">
           <Package size={14} className="text-primary-600" />
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Extras / Ítems configurables</p>
+          <p className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Extras / Ítems configurables</p>
         </div>
 
         {visibleItems.length > 0 && (
           <div className="space-y-1.5">
             {items.map((item, idx) => item.toDelete ? null : (
-              <div key={idx} className="flex items-center gap-2 bg-gray-50 rounded-lg px-3 py-2">
-                <span className="text-sm text-gray-800 flex-1">{item.name}</span>
-                <span className="text-xs text-gray-500">${item.cost}</span>
-                <span className="text-xs text-gray-400 bg-white border border-gray-200 rounded px-1.5 py-0.5">
+              <div key={idx} className="flex items-center gap-2 bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2">
+                <span className="text-sm text-gray-800 dark:text-slate-200 flex-1">{item.name}</span>
+                <span className="text-xs text-gray-500 dark:text-slate-400">${item.cost}</span>
+                <span className="text-xs text-gray-400 dark:text-slate-500 bg-white dark:bg-slate-700 border border-gray-200 dark:border-slate-600 rounded px-1.5 py-0.5">
                   {item.type === 'BOOLEAN' ? 'Sí/No' : 'Cantidad'}
                 </span>
                 <button
                   type="button"
                   onClick={() => removeItem(idx)}
-                  className="p-1 text-gray-400 hover:text-red-500 rounded"
+                  className="p-1 text-gray-400 dark:text-slate-500 hover:text-red-500 rounded"
                 >
                   <Trash2 size={13} />
                 </button>
@@ -246,34 +246,34 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
         <div className="space-y-2">
           <div className="flex gap-2">
             <div className="flex-1">
-              <label className="text-xs text-gray-500 mb-1 block">Nombre del ítem</label>
+              <label className="text-xs text-gray-500 dark:text-slate-400 mb-1 block">Nombre del ítem</label>
               <input
                 value={newItemName}
                 onChange={e => setNewItemName(e.target.value)}
                 placeholder="Ej: Estampa delantera"
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addItem() } }}
               />
             </div>
           </div>
           <div className="flex items-end gap-2">
             <div className="flex-1">
-              <label className="text-xs text-gray-500 mb-1 block">Costo ($)</label>
+              <label className="text-xs text-gray-500 dark:text-slate-400 mb-1 block">Costo ($)</label>
               <input
                 type="number"
                 min="0"
                 step="0.01"
                 value={newItemCost}
                 onChange={e => setNewItemCost(Number(e.target.value))}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
               />
             </div>
             <div className="flex-1">
-              <label className="text-xs text-gray-500 mb-1 block">Tipo</label>
+              <label className="text-xs text-gray-500 dark:text-slate-400 mb-1 block">Tipo</label>
               <select
                 value={newItemType}
                 onChange={e => setNewItemType(e.target.value as 'QUANTITY' | 'BOOLEAN')}
-                className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-2 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="QUANTITY">Cantidad</option>
                 <option value="BOOLEAN">Sí/No</option>
@@ -283,7 +283,7 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
               type="button"
               onClick={addItem}
               disabled={!newItemName.trim()}
-              className="p-2 rounded-lg bg-primary-50 text-primary-600 hover:bg-primary-100 disabled:opacity-40 shrink-0"
+              className="p-2 rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-600 hover:bg-primary-100 dark:hover:bg-primary-900/50 disabled:opacity-40 shrink-0"
             >
               <Plus size={16} />
             </button>
@@ -296,7 +296,7 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp size={14} className="text-primary-600" />
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Escalas de precio</p>
+            <p className="text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase tracking-wide">Escalas de precio</p>
           </div>
           <button
             type="button"
@@ -308,40 +308,40 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
         </div>
 
         {rules.length === 0 ? (
-          <p className="text-xs text-gray-400">Sin escalas — se usará el precio base del producto.</p>
+          <p className="text-xs text-gray-400 dark:text-slate-500">Sin escalas — se usará el precio base del producto.</p>
         ) : (
           <div className="space-y-2">
             {rules.map((rule, idx) => (
-              <div key={idx} className="bg-gray-50 rounded-lg px-3 py-2 space-y-2">
+              <div key={idx} className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2 space-y-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-xs text-gray-500">Cant. de</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400">Cant. de</span>
                   <input
                     type="number" min="1" step="1"
                     value={rule.minQty}
                     onChange={e => updateRule(idx, 'minQty', parseInt(e.target.value) || 1)}
-                    className="w-16 px-2 py-1 text-sm border border-gray-200 rounded text-center bg-white"
+                    className="w-16 px-2 py-1 text-sm border border-gray-200 dark:border-slate-600 rounded text-center bg-white dark:bg-slate-800 dark:text-slate-100"
                   />
-                  <span className="text-xs text-gray-500">a</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400">a</span>
                   <input
                     type="number" min="1" step="1"
                     value={rule.maxQty ?? ''}
                     placeholder="∞"
                     onChange={e => updateRule(idx, 'maxQty', e.target.value ? parseInt(e.target.value) : null)}
-                    className="w-16 px-2 py-1 text-sm border border-gray-200 rounded text-center bg-white"
+                    className="w-16 px-2 py-1 text-sm border border-gray-200 dark:border-slate-600 rounded text-center bg-white dark:bg-slate-800 dark:text-slate-100"
                   />
-                  <span className="text-xs text-gray-500">un</span>
-                  <span className="text-xs text-gray-500 ml-auto sm:ml-0">Margen</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400">un</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400 ml-auto sm:ml-0">Margen</span>
                   <input
                     type="number" min="0" step="1"
                     value={rule.marginPercentage}
                     onChange={e => updateRule(idx, 'marginPercentage', Number(e.target.value))}
-                    className="w-20 px-2 py-1 text-sm border border-gray-200 rounded text-right bg-white"
+                    className="w-20 px-2 py-1 text-sm border border-gray-200 dark:border-slate-600 rounded text-right bg-white dark:bg-slate-800 dark:text-slate-100"
                   />
-                  <span className="text-xs text-gray-500">%</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400">%</span>
                   <button
                     type="button"
                     onClick={() => removeRule(idx)}
-                    className="p-1 text-gray-400 hover:text-red-500 rounded"
+                    className="p-1 text-gray-400 dark:text-slate-500 hover:text-red-500 rounded"
                   >
                     <Trash2 size={13} />
                   </button>
@@ -354,13 +354,13 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
 
       {/* ── Error ────────────────────────────────────────────── */}
       {formError && (
-        <div className="mx-5 mb-1 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+        <div className="mx-5 mb-1 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-lg px-4 py-3">
           {formError}
         </div>
       )}
 
       {/* ── Acciones ─────────────────────────────────────────── */}
-      <div className="p-5 flex gap-3 bg-white sticky bottom-0">
+      <div className="p-5 flex gap-3 bg-white dark:bg-slate-800 sticky bottom-0">
         <Button type="button" variant="secondary" onClick={onCancel} className="flex-1">
           Cancelar
         </Button>

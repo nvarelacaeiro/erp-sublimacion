@@ -49,11 +49,11 @@ function ItemRow({
 
   if (editing) {
     return (
-      <div className="flex items-center gap-2 px-4 py-3 bg-blue-50 border-b border-blue-100">
+      <div className="flex items-center gap-2 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-100 dark:border-blue-800">
         <input
           value={name}
           onChange={e => setName(e.target.value)}
-          className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+          className="flex-1 px-2 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-800 dark:text-slate-100"
         />
         <input
           type="number"
@@ -61,12 +61,12 @@ function ItemRow({
           step="0.01"
           value={cost}
           onChange={e => setCost(Number(e.target.value))}
-          className="w-24 px-2 py-1 text-sm border border-gray-300 rounded text-right"
+          className="w-24 px-2 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded text-right bg-white dark:bg-slate-800 dark:text-slate-100"
         />
         <select
           value={type}
           onChange={e => setType(e.target.value as 'QUANTITY' | 'BOOLEAN')}
-          className="text-sm border border-gray-300 rounded px-1 py-1 bg-white"
+          className="text-sm border border-gray-300 dark:border-slate-600 rounded px-1 py-1 bg-white dark:bg-slate-800 dark:text-slate-100"
         >
           <option value="QUANTITY">Cantidad</option>
           <option value="BOOLEAN">Sí/No</option>
@@ -78,16 +78,16 @@ function ItemRow({
   }
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+    <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-slate-700">
       <div className="flex-1">
-        <span className="text-sm font-medium text-gray-900">{item.name}</span>
-        <span className="ml-2 text-xs text-gray-500">
+        <span className="text-sm font-medium text-gray-900 dark:text-slate-100">{item.name}</span>
+        <span className="ml-2 text-xs text-gray-500 dark:text-slate-400">
           {item.type === 'BOOLEAN' ? '(Sí/No)' : '(Cantidad)'}
         </span>
       </div>
-      <span className="text-sm text-gray-700">{formatCurrency(item.cost)}</span>
-      <button onClick={() => setEditing(true)} className="p-1.5 rounded hover:bg-gray-100 text-gray-500"><Pencil size={14} /></button>
-      <button onClick={() => onDelete(item.id)} className="p-1.5 rounded hover:bg-red-50 text-red-500"><Trash2 size={14} /></button>
+      <span className="text-sm text-gray-700 dark:text-slate-300">{formatCurrency(item.cost)}</span>
+      <button onClick={() => setEditing(true)} className="p-1.5 rounded hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400"><Pencil size={14} /></button>
+      <button onClick={() => onDelete(item.id)} className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500"><Trash2 size={14} /></button>
     </div>
   )
 }
@@ -102,8 +102,8 @@ function PricingRuleRow({
   onDelete: (id: string) => void
 }) {
   return (
-    <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
-      <div className="flex items-center gap-1 text-sm text-gray-600">
+    <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-slate-700">
+      <div className="flex items-center gap-1 text-sm text-gray-600 dark:text-slate-300">
         <span>de</span>
         <input
           type="number"
@@ -111,7 +111,7 @@ function PricingRuleRow({
           step="1"
           value={rule.minQty}
           onChange={e => onChange(rule.id, 'minQty', parseInt(e.target.value) || 1)}
-          className="w-16 px-2 py-1 text-sm border border-gray-300 rounded text-center"
+          className="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded text-center bg-white dark:bg-slate-800 dark:text-slate-100"
         />
         <span>a</span>
         <input
@@ -121,23 +121,23 @@ function PricingRuleRow({
           value={rule.maxQty ?? ''}
           placeholder="∞"
           onChange={e => onChange(rule.id, 'maxQty', e.target.value ? parseInt(e.target.value) : null)}
-          className="w-16 px-2 py-1 text-sm border border-gray-300 rounded text-center"
+          className="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded text-center bg-white dark:bg-slate-800 dark:text-slate-100"
         />
         <span>unidades</span>
       </div>
       <div className="flex items-center gap-1 ml-auto">
-        <span className="text-sm text-gray-600">Margen:</span>
+        <span className="text-sm text-gray-600 dark:text-slate-300">Margen:</span>
         <input
           type="number"
           min="0"
           step="1"
           value={rule.marginPercentage}
           onChange={e => onChange(rule.id, 'marginPercentage', Number(e.target.value))}
-          className="w-20 px-2 py-1 text-sm border border-gray-300 rounded text-right"
+          className="w-20 px-2 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded text-right bg-white dark:bg-slate-800 dark:text-slate-100"
         />
-        <span className="text-sm text-gray-600">%</span>
+        <span className="text-sm text-gray-600 dark:text-slate-300">%</span>
       </div>
-      <button onClick={() => onDelete(rule.id)} className="p-1.5 rounded hover:bg-red-50 text-red-500 ml-2"><Trash2 size={14} /></button>
+      <button onClick={() => onDelete(rule.id)} className="p-1.5 rounded hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 ml-2"><Trash2 size={14} /></button>
     </div>
   )
 }
@@ -266,24 +266,24 @@ export default function ProductConfigPage() {
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={() => router.push('/products')} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500">
+        <button onClick={() => router.push('/products')} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400">
           <ArrowLeft size={18} />
         </button>
         <div>
-          <h1 className="text-lg font-semibold text-gray-900">{product?.name ?? 'Producto'}</h1>
-          <p className="text-xs text-gray-500">Configuración de ítems y precios</p>
+          <h1 className="text-lg font-semibold text-gray-900 dark:text-slate-100">{product?.name ?? 'Producto'}</h1>
+          <p className="text-xs text-gray-500 dark:text-slate-400">Configuración de ítems y precios</p>
         </div>
       </div>
 
       {/* ── Ítems extras ─────────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-slate-700">
           <Package size={16} className="text-primary-600" />
-          <h2 className="text-sm font-semibold text-gray-900">Ítems configurables (extras)</h2>
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Ítems configurables (extras)</h2>
         </div>
 
         {items.length === 0 ? (
-          <div className="px-4 py-6 text-center text-sm text-gray-400">
+          <div className="px-4 py-6 text-center text-sm text-gray-400 dark:text-slate-500">
             Sin ítems aún. Agregá estampas, stickers, packaging, etc.
           </div>
         ) : (
@@ -298,12 +298,12 @@ export default function ProductConfigPage() {
         )}
 
         {/* Agregar ítem */}
-        <form onSubmit={handleAddItem} className="flex items-center gap-2 px-4 py-3 bg-gray-50">
+        <form onSubmit={handleAddItem} className="flex items-center gap-2 px-4 py-3 bg-gray-50 dark:bg-slate-700/50">
           <input
             value={newItemName}
             onChange={e => setNewItemName(e.target.value)}
             placeholder="Ej: Estampa delantera"
-            className="flex-1 px-2 py-1.5 text-sm border border-gray-300 rounded-lg"
+            className="flex-1 px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
           />
           <input
             type="number"
@@ -311,13 +311,13 @@ export default function ProductConfigPage() {
             step="0.01"
             value={newItemCost}
             onChange={e => setNewItemCost(Number(e.target.value))}
-            className="w-24 px-2 py-1.5 text-sm border border-gray-300 rounded-lg text-right"
+            className="w-24 px-2 py-1.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg text-right bg-white dark:bg-slate-800 dark:text-slate-100"
             placeholder="Costo"
           />
           <select
             value={newItemType}
             onChange={e => setNewItemType(e.target.value as 'QUANTITY' | 'BOOLEAN')}
-            className="text-sm border border-gray-300 rounded-lg px-2 py-1.5 bg-white"
+            className="text-sm border border-gray-300 dark:border-slate-600 rounded-lg px-2 py-1.5 bg-white dark:bg-slate-800 dark:text-slate-100"
           >
             <option value="QUANTITY">Cantidad</option>
             <option value="BOOLEAN">Sí/No</option>
@@ -328,16 +328,16 @@ export default function ProductConfigPage() {
         </form>
 
         {itemError && (
-          <div className="px-4 py-2 text-sm text-red-600 bg-red-50">{itemError}</div>
+          <div className="px-4 py-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20">{itemError}</div>
         )}
       </div>
 
       {/* ── Escalas de precio ────────────────────────────── */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-slate-700">
           <div className="flex items-center gap-2">
             <TrendingUp size={16} className="text-primary-600" />
-            <h2 className="text-sm font-semibold text-gray-900">Escalas de precio</h2>
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Escalas de precio</h2>
           </div>
           <button
             onClick={addRule}
@@ -348,7 +348,7 @@ export default function ProductConfigPage() {
         </div>
 
         {rules.length === 0 ? (
-          <div className="px-4 py-6 text-center text-sm text-gray-400">
+          <div className="px-4 py-6 text-center text-sm text-gray-400 dark:text-slate-500">
             Sin escalas. Sin escalas se usa el precio base del producto.
           </div>
         ) : (
@@ -363,11 +363,11 @@ export default function ProductConfigPage() {
         )}
 
         {ruleError && (
-          <div className="px-4 py-2 text-sm text-red-600 bg-red-50">{ruleError}</div>
+          <div className="px-4 py-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20">{ruleError}</div>
         )}
 
         {rulesDirty && (
-          <div className="px-4 py-3 border-t border-gray-100 flex justify-end">
+          <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-700 flex justify-end">
             <Button
               size="sm"
               onClick={() => saveRules.mutate()}
@@ -380,32 +380,32 @@ export default function ProductConfigPage() {
       </div>
 
       {/* ── Calculadora de precio ────────────────────────── */}
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
+        <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-slate-700">
           <Tag size={16} className="text-primary-600" />
-          <h2 className="text-sm font-semibold text-gray-900">Calculadora de precio</h2>
+          <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Calculadora de precio</h2>
         </div>
 
         <div className="p-4 space-y-4">
           <div className="flex items-center gap-3">
-            <label className="text-sm text-gray-700 w-24">Cantidad</label>
+            <label className="text-sm text-gray-700 dark:text-slate-300 w-24">Cantidad</label>
             <input
               type="number"
               min="1"
               step="1"
               value={calcQty}
               onChange={e => setCalcQty(Math.max(1, parseInt(e.target.value) || 1))}
-              className="w-24 px-3 py-2 text-sm border border-gray-300 rounded-lg"
+              className="w-24 px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 dark:text-slate-100"
             />
           </div>
 
           {items.length > 0 && (
             <div className="space-y-2">
-              <p className="text-sm font-medium text-gray-700">Ítems seleccionados</p>
+              <p className="text-sm font-medium text-gray-700 dark:text-slate-300">Ítems seleccionados</p>
               {items.map(item => (
                 <div key={item.id} className="flex items-center gap-3">
-                  <span className="text-sm text-gray-700 flex-1">{item.name}</span>
-                  <span className="text-xs text-gray-500">{formatCurrency(item.cost)}</span>
+                  <span className="text-sm text-gray-700 dark:text-slate-300 flex-1">{item.name}</span>
+                  <span className="text-xs text-gray-500 dark:text-slate-400">{formatCurrency(item.cost)}</span>
                   {item.type === 'BOOLEAN' ? (
                     <input
                       type="checkbox"
@@ -424,7 +424,7 @@ export default function ProductConfigPage() {
                       min="0"
                       step="1"
                       defaultValue={0}
-                      className="w-16 px-2 py-1 text-sm border border-gray-300 rounded text-center"
+                      className="w-16 px-2 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded text-center bg-white dark:bg-slate-700 dark:text-slate-100"
                       onChange={e => {
                         const qty = Math.max(0, parseInt(e.target.value) || 0)
                         setCalcItems(prev => {
@@ -440,27 +440,27 @@ export default function ProductConfigPage() {
           )}
 
           {calcResult && (
-            <div className="bg-gray-50 rounded-lg p-4 space-y-1.5">
-              <div className="flex justify-between text-sm text-gray-600">
+            <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4 space-y-1.5">
+              <div className="flex justify-between text-sm text-gray-600 dark:text-slate-300">
                 <span>Costo base</span><span>{formatCurrency(calcResult.baseCost)}</span>
               </div>
               {calcResult.extraCost > 0 && (
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-sm text-gray-600 dark:text-slate-300">
                   <span>Costo extras</span><span>{formatCurrency(calcResult.extraCost)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-sm text-gray-600">
+              <div className="flex justify-between text-sm text-gray-600 dark:text-slate-300">
                 <span>Costo total</span><span>{formatCurrency(calcResult.totalCost)}</span>
               </div>
               {calcResult.ruleApplied && (
-                <div className="flex justify-between text-sm text-gray-500 text-xs">
+                <div className="flex justify-between text-sm text-gray-500 dark:text-slate-400 text-xs">
                   <span>
                     Escala {calcResult.ruleApplied.minQty}–{calcResult.ruleApplied.maxQty ?? '∞'} un
                   </span>
                   <span>Margen {calcResult.margin}%</span>
                 </div>
               )}
-              <div className="flex justify-between text-base font-bold text-gray-900 pt-1 border-t border-gray-200">
+              <div className="flex justify-between text-base font-bold text-gray-900 dark:text-slate-100 pt-1 border-t border-gray-200 dark:border-slate-600">
                 <span>Precio unitario</span>
                 <span>{formatCurrency(calcResult.unitPrice)}</span>
               </div>

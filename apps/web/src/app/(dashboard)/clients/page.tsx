@@ -38,10 +38,10 @@ function ClientForm({
       <Input label="CUIT / DNI" {...register('taxId')} />
       <Input label="Dirección" {...register('address')} />
       <div>
-        <label className="text-sm font-medium text-gray-700 block mb-1">Notas</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-slate-300 block mb-1">Notas</label>
         <textarea
           rows={2}
-          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+          className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none bg-white dark:bg-slate-800 dark:text-slate-100"
           {...register('notes')}
         />
       </div>
@@ -87,7 +87,7 @@ export default function ClientsPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar clientes..."
-            className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
           />
         </div>
         <Button onClick={openCreate}>Nuevo</Button>
@@ -96,7 +96,7 @@ export default function ClientsPage() {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-16 bg-white rounded-xl border animate-pulse" />
+            <div key={i} className="h-16 bg-white dark:bg-slate-800 rounded-xl border dark:border-slate-700 animate-pulse" />
           ))}
         </div>
       ) : clients.length === 0 ? (
@@ -107,17 +107,17 @@ export default function ClientsPage() {
           action={<Button onClick={openCreate}>Nuevo cliente</Button>}
         />
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 divide-y divide-gray-100 dark:divide-slate-700">
           {clients.map(client => (
             <div key={client.id} className="flex items-center gap-3 px-4 py-3.5">
-              <div className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center shrink-0">
-                <span className="text-primary-700 text-sm font-semibold">
+              <div className="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center shrink-0">
+                <span className="text-primary-700 dark:text-primary-400 text-sm font-semibold">
                   {client.name.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-sm font-medium text-gray-900 truncate">{client.name}</div>
-                <div className="text-xs text-gray-500 flex gap-3">
+                <div className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">{client.name}</div>
+                <div className="text-xs text-gray-500 dark:text-slate-400 flex gap-3">
                   {client.phone && <span>{client.phone}</span>}
                   {client.totalDebt > 0 && (
                     <span className="text-amber-600 font-medium">
@@ -132,7 +132,7 @@ export default function ClientsPage() {
                     href={`https://wa.me/${client.phone.replace(/\D/g, '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-2 rounded-lg hover:bg-green-50 text-gray-400 hover:text-green-600"
+                    className="p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-400 dark:text-slate-500 hover:text-green-600"
                     title="WhatsApp"
                   >
                     <Phone size={15} />
@@ -141,18 +141,18 @@ export default function ClientsPage() {
                 {client.email && (
                   <a
                     href={`mailto:${client.email}`}
-                    className="p-2 rounded-lg hover:bg-blue-50 text-gray-400 hover:text-blue-600"
+                    className="p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 text-gray-400 dark:text-slate-500 hover:text-blue-600"
                     title="Email"
                   >
                     <Mail size={15} />
                   </a>
                 )}
-                <button onClick={() => openEdit(client)} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500">
+                <button onClick={() => openEdit(client)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400">
                   <Pencil size={15} />
                 </button>
                 <button
                   onClick={() => handleDelete(client.id)}
-                  className="p-2 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-600"
+                  className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-500 dark:text-slate-400 hover:text-red-600"
                 >
                   <Trash2 size={15} />
                 </button>

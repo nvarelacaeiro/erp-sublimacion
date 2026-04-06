@@ -61,26 +61,26 @@ function UserForm({
   return (
     <form onSubmit={handleSubmit} className="p-5 space-y-4">
       <div>
-        <label className="text-sm font-medium text-gray-700 block mb-1">Nombre *</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-slate-300 block mb-1">Nombre *</label>
         <input
           value={name}
           onChange={e => setName(e.target.value)}
           required
-          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
         />
       </div>
       <div>
-        <label className="text-sm font-medium text-gray-700 block mb-1">Email *</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-slate-300 block mb-1">Email *</label>
         <input
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
-          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
         />
       </div>
       <div>
-        <label className="text-sm font-medium text-gray-700 block mb-1">
+        <label className="text-sm font-medium text-gray-700 dark:text-slate-300 block mb-1">
           {isEdit ? 'Nueva contraseña (opcional)' : 'Contraseña *'}
         </label>
         <input
@@ -88,22 +88,22 @@ function UserForm({
           value={password}
           onChange={e => setPassword(e.target.value)}
           placeholder={isEdit ? 'Dejar vacío para no cambiar' : '••••••••'}
-          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
         />
       </div>
       <div>
-        <label className="text-sm font-medium text-gray-700 block mb-1">Rol</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-slate-300 block mb-1">Rol</label>
         <select
           value={role}
           onChange={e => setRole(e.target.value as 'ADMIN' | 'SELLER')}
-          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white"
+          className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
         >
           {ROLE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
         </select>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-lg px-4 py-3">
           {error}
         </div>
       )}
@@ -149,7 +149,7 @@ export default function UsersPage() {
   if (!isAdmin) {
     return (
       <div className="p-4 md:p-6 max-w-2xl mx-auto">
-        <div className="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-6 text-center">
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-400 rounded-xl px-4 py-6 text-center">
           <ShieldAlert size={32} className="mx-auto mb-2 text-amber-600" />
           <p className="font-medium">Solo los administradores pueden gestionar usuarios.</p>
         </div>
@@ -166,7 +166,7 @@ export default function UsersPage() {
       </div>
 
       {globalError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-lg px-4 py-3 mb-4">
           {globalError}
         </div>
       )}
@@ -174,17 +174,17 @@ export default function UsersPage() {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-16 bg-white rounded-xl border animate-pulse" />
+            <div key={i} className="h-16 bg-white dark:bg-slate-800 rounded-xl border dark:border-slate-700 animate-pulse" />
           ))}
         </div>
       ) : users.length === 0 ? (
         <EmptyState icon={UserRound} title="Sin usuarios" description="Creá el primer usuario." />
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 divide-y divide-gray-100 dark:divide-slate-700">
           {users.map(u => (
             <div key={u.id} className="flex items-center gap-3 px-4 py-3.5">
               <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
-                u.role === 'ADMIN' ? 'bg-primary-100' : 'bg-gray-100'
+                u.role === 'ADMIN' ? 'bg-primary-100 dark:bg-primary-900/30' : 'bg-gray-100 dark:bg-slate-700'
               }`}>
                 {u.role === 'ADMIN'
                   ? <ShieldCheck size={16} className="text-primary-600" />
@@ -193,7 +193,7 @@ export default function UsersPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-gray-900 truncate">{u.name}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">{u.name}</span>
                   <Badge
                     label={u.role === 'ADMIN' ? 'Admin' : 'Operador'}
                     className={u.role === 'ADMIN' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600'}
@@ -202,12 +202,12 @@ export default function UsersPage() {
                     <Badge label="Inactivo" className="bg-red-100 text-red-600" />
                   )}
                 </div>
-                <div className="text-xs text-gray-500">{u.email}</div>
+                <div className="text-xs text-gray-500 dark:text-slate-400">{u.email}</div>
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 <button
                   onClick={() => { setSelected(u); setShowForm(true) }}
-                  className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"
+                  className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400"
                 >
                   <Pencil size={15} />
                 </button>
@@ -217,7 +217,7 @@ export default function UsersPage() {
                       if (!confirm(`¿Desactivar a ${u.name}?`)) return
                       remove.mutate(u.id)
                     }}
-                    className="p-2 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-600"
+                    className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-500 dark:text-slate-400 hover:text-red-600"
                   >
                     <Trash2 size={15} />
                   </button>

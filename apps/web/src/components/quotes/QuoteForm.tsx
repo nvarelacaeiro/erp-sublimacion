@@ -87,24 +87,24 @@ export function QuoteForm({ onSave, onCancel, loading }: QuoteFormProps) {
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Cliente */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">Cliente</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Cliente</label>
         <div className="relative">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             value={clientSearch}
             onChange={e => { setClientSearch(e.target.value); setClientId('') }}
             placeholder="Buscar cliente (opcional)..."
-            className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
           />
         </div>
         {clientSearch && !clientId && clients.length > 0 && (
-          <div className="border border-gray-200 rounded-lg bg-white shadow-sm divide-y max-h-40 overflow-y-auto">
+          <div className="border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 shadow-sm divide-y dark:divide-slate-700 max-h-40 overflow-y-auto">
             {clients.slice(0, 6).map(c => (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => { setClientId(c.id); setClientSearch(c.name) }}
-                className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-50"
+                className="w-full text-left px-3 py-2.5 text-sm hover:bg-gray-50 dark:hover:bg-slate-700 dark:text-slate-200"
               >
                 {c.name}
                 {c.phone && <span className="text-gray-400 ml-2">{c.phone}</span>}
@@ -117,7 +117,7 @@ export function QuoteForm({ onSave, onCancel, loading }: QuoteFormProps) {
       {/* Items */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium text-gray-700">Productos / Servicios</label>
+          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Productos / Servicios</label>
           <button
             type="button"
             onClick={addItem}
@@ -146,19 +146,19 @@ export function QuoteForm({ onSave, onCancel, loading }: QuoteFormProps) {
       </div>
 
       {/* Totales */}
-      <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+      <div className="bg-gray-50 dark:bg-slate-700/50 rounded-xl p-4 space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-sm text-gray-600">Descuento (%)</label>
+          <label className="text-sm text-gray-600 dark:text-slate-300">Descuento (%)</label>
           <input
             type="number"
             min="0"
             max="100"
             value={discount}
             onChange={e => setDiscount(Number(e.target.value))}
-            className="w-20 px-2 py-1 text-sm border border-gray-300 rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-20 px-2 py-1 text-sm border border-gray-300 dark:border-slate-600 rounded-lg text-right focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
           />
         </div>
-        <div className="flex justify-between text-sm text-gray-600">
+        <div className="flex justify-between text-sm text-gray-600 dark:text-slate-300">
           <span>Subtotal</span>
           <span>{formatCurrency(subtotal)}</span>
         </div>
@@ -168,7 +168,7 @@ export function QuoteForm({ onSave, onCancel, loading }: QuoteFormProps) {
             <span>-{formatCurrency(discountAmount)}</span>
           </div>
         )}
-        <div className="flex justify-between text-base font-bold text-gray-900 pt-1 border-t border-gray-200">
+        <div className="flex justify-between text-base font-bold text-gray-900 dark:text-slate-100 pt-1 border-t border-gray-200 dark:border-slate-600">
           <span>Total</span>
           <span>{formatCurrency(total)}</span>
         </div>
@@ -176,18 +176,18 @@ export function QuoteForm({ onSave, onCancel, loading }: QuoteFormProps) {
 
       {/* Notas */}
       <div>
-        <label className="text-sm font-medium text-gray-700 block mb-1">Notas (opcional)</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-slate-300 block mb-1">Notas (opcional)</label>
         <textarea
           value={notes}
           onChange={e => setNotes(e.target.value)}
           rows={2}
           placeholder="Condiciones, aclaraciones..."
-          className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+          className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none bg-white dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
         />
       </div>
 
       {formError && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-lg px-4 py-3">
           {formError}
         </div>
       )}

@@ -90,7 +90,7 @@ export function ProductLineItem({
   const extraPrice = result ? result.extraCost * multiplier : 0
 
   return (
-    <div className="border border-gray-200 rounded-xl p-3 space-y-3">
+    <div className="border border-gray-200 dark:border-slate-700 rounded-xl p-3 space-y-3 bg-white dark:bg-slate-800">
       {/* Product search */}
       <div className="relative">
         <input
@@ -106,10 +106,10 @@ export function ProductLineItem({
           onFocus={() => onFocusSearch(idx)}
           onBlur={() => setTimeout(() => onFocusSearch(-1), 150)}
           placeholder="Descripción o buscar producto..."
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 dark:text-slate-100 dark:placeholder-slate-500"
         />
         {showProductSearch === idx && products.length > 0 && (productSearch[idx] ?? '').length > 0 && (
-          <div className="absolute top-full left-0 right-0 z-20 mt-1 border border-gray-200 rounded-lg bg-white shadow-lg max-h-44 overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 z-20 mt-1 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 shadow-lg max-h-44 overflow-y-auto">
             {products.slice(0, 6).map(p => (
               <button
                 key={p.id}
@@ -119,7 +119,7 @@ export function ProductLineItem({
                   setSelectedExtras([])
                   setAutoPrice(false)
                 }}
-                className="w-full text-left px-3 py-2.5 hover:bg-gray-50 flex justify-between items-center text-sm"
+                className="w-full text-left px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-slate-700 flex justify-between items-center text-sm dark:text-slate-200"
               >
                 <span>{p.name}</span>
                 <span className="text-primary-600 font-medium">{formatCurrency(p.price)}</span>
@@ -131,11 +131,11 @@ export function ProductLineItem({
 
       {/* Configurable extras — only when product has items */}
       {item.productId && configItems.length > 0 && (
-        <div className="bg-gray-50 rounded-lg px-3 py-2.5 space-y-2">
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Extras</p>
+        <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2.5 space-y-2">
+          <p className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wide">Extras</p>
           {configItems.map(ci => (
             <div key={ci.id} className="flex items-center gap-2">
-              <span className="text-sm text-gray-700 flex-1">{ci.name}</span>
+              <span className="text-sm text-gray-700 dark:text-slate-300 flex-1">{ci.name}</span>
               {ci.type === 'BOOLEAN' ? (
                 <input
                   type="checkbox"
@@ -148,7 +148,7 @@ export function ProductLineItem({
                   min="0"
                   step="1"
                   defaultValue={0}
-                  className="w-16 px-2 py-1 text-sm border border-gray-200 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="w-16 px-2 py-1 text-sm border border-gray-200 dark:border-slate-600 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 dark:text-slate-100"
                   onChange={e => updateExtra(ci.id, Math.max(0, parseInt(e.target.value) || 0))}
                 />
               )}
@@ -160,18 +160,18 @@ export function ProductLineItem({
       {/* Quantity + unit price + total */}
       <div className="grid grid-cols-3 gap-2 items-end">
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">Cantidad</label>
+          <label className="text-xs text-gray-500 dark:text-slate-400 mb-1 block">Cantidad</label>
           <input
             type="number"
             min="1"
             step="1"
             value={item.quantity}
             onChange={e => onUpdate(idx, 'quantity', Math.max(1, parseInt(e.target.value) || 1))}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 dark:text-slate-100"
           />
         </div>
         <div>
-          <label className="text-xs text-gray-500 mb-1 flex items-center gap-1">
+          <label className="text-xs text-gray-500 dark:text-slate-400 mb-1 flex items-center gap-1">
             Precio unit.
             {autoPrice && (
               <span className="flex items-center gap-0.5 text-primary-600 font-medium">
@@ -188,16 +188,16 @@ export function ProductLineItem({
               setAutoPrice(false)
               onUpdate(idx, 'unitPrice', Number(e.target.value))
             }}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 dark:text-slate-100"
           />
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold">{formatCurrency(item.quantity * item.unitPrice)}</span>
+          <span className="text-sm font-semibold dark:text-slate-100">{formatCurrency(item.quantity * item.unitPrice)}</span>
           {itemsCount > 1 && (
             <button
               type="button"
               onClick={() => onRemove(idx)}
-              className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500"
+              className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 dark:text-slate-500 hover:text-red-500"
             >
               <Trash2 size={14} />
             </button>
@@ -207,7 +207,7 @@ export function ProductLineItem({
 
       {/* Pricing tier + breakdown — only when auto-calculated */}
       {autoPrice && result && (
-        <div className="text-xs text-gray-400 border-t border-gray-100 pt-2 space-y-0.5">
+        <div className="text-xs text-gray-400 dark:text-slate-500 border-t border-gray-100 dark:border-slate-700 pt-2 space-y-0.5">
           {result.ruleApplied && (
             <div className="flex items-center gap-1 text-primary-500 font-medium mb-1">
               <Zap size={10} />

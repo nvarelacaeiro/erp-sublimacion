@@ -67,7 +67,7 @@ export default function CategoriesPage() {
           value={newName}
           onChange={e => setNewName(e.target.value)}
           placeholder="Nueva categoría..."
-          className="flex-1 px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="flex-1 px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
         />
         <Button type="submit" loading={create.isPending} disabled={!newName.trim()}>
           <Plus size={16} /> Agregar
@@ -75,7 +75,7 @@ export default function CategoriesPage() {
       </form>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-lg px-4 py-3 mb-4">
           {error}
         </div>
       )}
@@ -83,7 +83,7 @@ export default function CategoriesPage() {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-14 bg-white rounded-xl border animate-pulse" />
+            <div key={i} className="h-14 bg-white dark:bg-slate-800 rounded-xl border dark:border-slate-700 animate-pulse" />
           ))}
         </div>
       ) : categories.length === 0 ? (
@@ -93,10 +93,10 @@ export default function CategoriesPage() {
           description="Creá tu primera categoría para organizar los productos."
         />
       ) : (
-        <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 divide-y divide-gray-100 dark:divide-slate-700">
           {categories.map(cat => (
             <div key={cat.id} className="flex items-center gap-3 px-4 py-3">
-              <div className="p-1.5 rounded-lg bg-primary-50">
+              <div className="p-1.5 rounded-lg bg-primary-50 dark:bg-primary-900/30">
                 <Tag size={15} className="text-primary-600" />
               </div>
 
@@ -106,12 +106,12 @@ export default function CategoriesPage() {
                   onChange={e => setEditName(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') handleUpdate(cat.id); if (e.key === 'Escape') setEditId(null) }}
                   autoFocus
-                  className="flex-1 px-2 py-1 text-sm border border-primary-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  className="flex-1 px-2 py-1 text-sm border border-primary-300 dark:border-primary-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 dark:text-slate-100"
                 />
               ) : (
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-gray-900">{cat.name}</div>
-                  <div className="text-xs text-gray-500">
+                  <div className="text-sm font-medium text-gray-900 dark:text-slate-100">{cat.name}</div>
+                  <div className="text-xs text-gray-500 dark:text-slate-400">
                     {cat._count.products} {cat._count.products === 1 ? 'producto' : 'productos'}
                   </div>
                 </div>
@@ -123,13 +123,13 @@ export default function CategoriesPage() {
                     <button
                       onClick={() => handleUpdate(cat.id)}
                       disabled={update.isPending}
-                      className="p-2 rounded-lg hover:bg-green-50 text-green-600"
+                      className="p-2 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600"
                     >
                       <Check size={15} />
                     </button>
                     <button
                       onClick={() => setEditId(null)}
-                      className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"
+                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400"
                     >
                       <X size={15} />
                     </button>
@@ -138,7 +138,7 @@ export default function CategoriesPage() {
                   <>
                     <button
                       onClick={() => startEdit(cat)}
-                      className="p-2 rounded-lg hover:bg-gray-100 text-gray-500"
+                      className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-500 dark:text-slate-400"
                     >
                       <Pencil size={15} />
                     </button>
@@ -149,7 +149,7 @@ export default function CategoriesPage() {
                         }
                         remove.mutate(cat.id)
                       }}
-                      className="p-2 rounded-lg hover:bg-red-50 text-gray-500 hover:text-red-600"
+                      className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-500 dark:text-slate-400 hover:text-red-600"
                     >
                       <Trash2 size={15} />
                     </button>
