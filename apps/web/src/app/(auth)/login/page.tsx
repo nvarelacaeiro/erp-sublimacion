@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
+import { SiTiendaLogo } from '@/components/layout/SiTiendaLogo'
 
 export default function LoginPage() {
   const { login } = useAuth()
@@ -29,14 +30,11 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex items-center justify-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-primary-600 flex items-center justify-center">
-            <span className="text-white text-xl font-bold">E</span>
-          </div>
+          <SiTiendaLogo className="h-10 w-auto" />
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <h1 className="text-xl font-semibold text-gray-900 mb-1">Iniciar sesión</h1>
-          <p className="text-sm text-gray-500 mb-6">ERP Sublimación</p>
+          <h1 className="text-xl font-semibold text-gray-900 mb-6">Iniciar sesión</h1>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
