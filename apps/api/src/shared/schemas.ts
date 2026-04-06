@@ -16,7 +16,7 @@ export const loginSchema = z.object({
 export const productSchema = z.object({
   categoryId: optionalId,
   name: z.string().min(1, 'El nombre es requerido').max(100),
-  sku: z.string().max(50).nullable().optional(),
+  sku: z.preprocess(v => (v === '' ? null : v), z.string().max(50).nullable().optional()),
   description: z.string().max(500).nullable().optional(),
   cost: z.number().min(0, 'El costo no puede ser negativo'),
   price: z.number().min(0, 'El precio no puede ser negativo'),
