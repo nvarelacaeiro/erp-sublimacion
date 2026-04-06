@@ -3,6 +3,7 @@ import { usePathname } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
+import { SiTiendaLogo } from './SiTiendaLogo'
 
 const PAGE_TITLES: Record<string, { title: string; action?: { label: string; href: string } }> = {
   '/': { title: 'Dashboard' },
@@ -29,7 +30,11 @@ export function TopBar() {
 
   return (
     <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-6 bg-white border-b border-gray-200 sticky top-0 z-30">
-      <h1 className="text-base md:text-lg font-semibold text-gray-900">{title}</h1>
+      {/* Móvil: logo | Desktop: título de página */}
+      <div className="flex items-center">
+        <SiTiendaLogo className="md:hidden" />
+        <h1 className="hidden md:block text-lg font-semibold text-gray-900">{title}</h1>
+      </div>
       {action && (
         <Link href={action.href}>
           <Button size="sm">

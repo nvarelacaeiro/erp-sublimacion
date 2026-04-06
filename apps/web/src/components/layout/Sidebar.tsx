@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/auth.store'
 import { useAuth } from '@/hooks/useAuth'
 import { useState } from 'react'
+import { SiTiendaLogo } from './SiTiendaLogo'
 
 const NAV_ITEMS = [
   { href: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -37,15 +38,11 @@ export function Sidebar() {
       )}
     >
       {/* Logo */}
-      <div className="flex items-center h-16 px-4 border-b border-gray-200 overflow-hidden">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center shrink-0">
-            <span className="text-white text-sm font-bold">E</span>
-          </div>
-          {!collapsed && (
-            <span className="font-semibold text-gray-900 truncate text-sm">ERP Sublimación</span>
-          )}
-        </div>
+      <div className={cn(
+        'flex items-center h-16 border-b border-gray-200 overflow-hidden',
+        collapsed ? 'justify-center px-2' : 'px-5',
+      )}>
+        <SiTiendaLogo collapsed={collapsed} />
       </div>
 
       {/* Nav */}
