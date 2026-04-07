@@ -42,7 +42,8 @@ export declare const productSchema: z.ZodObject<{
 }>;
 export declare const clientSchema: z.ZodObject<{
     name: z.ZodString;
-    email: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    businessName: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    email: z.ZodEffects<z.ZodUnion<[z.ZodOptional<z.ZodNullable<z.ZodString>>, z.ZodLiteral<"">]>, string | null | undefined, string | null | undefined>;
     phone: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     address: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     taxId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -50,6 +51,7 @@ export declare const clientSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     name: string;
     email?: string | null | undefined;
+    businessName?: string | null | undefined;
     phone?: string | null | undefined;
     address?: string | null | undefined;
     taxId?: string | null | undefined;
@@ -57,6 +59,7 @@ export declare const clientSchema: z.ZodObject<{
 }, {
     name: string;
     email?: string | null | undefined;
+    businessName?: string | null | undefined;
     phone?: string | null | undefined;
     address?: string | null | undefined;
     taxId?: string | null | undefined;
@@ -64,7 +67,8 @@ export declare const clientSchema: z.ZodObject<{
 }>;
 export declare const supplierSchema: z.ZodObject<{
     name: z.ZodString;
-    email: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    businessName: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    email: z.ZodEffects<z.ZodUnion<[z.ZodOptional<z.ZodNullable<z.ZodString>>, z.ZodLiteral<"">]>, string | null | undefined, string | null | undefined>;
     phone: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     address: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     taxId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -72,6 +76,7 @@ export declare const supplierSchema: z.ZodObject<{
 }, "strip", z.ZodTypeAny, {
     name: string;
     email?: string | null | undefined;
+    businessName?: string | null | undefined;
     phone?: string | null | undefined;
     address?: string | null | undefined;
     taxId?: string | null | undefined;
@@ -79,6 +84,7 @@ export declare const supplierSchema: z.ZodObject<{
 }, {
     name: string;
     email?: string | null | undefined;
+    businessName?: string | null | undefined;
     phone?: string | null | undefined;
     address?: string | null | undefined;
     taxId?: string | null | undefined;
@@ -176,10 +182,10 @@ export declare const saleSchema: z.ZodObject<{
         productId?: string | null | undefined;
     }[];
     paymentMethod: "CASH" | "TRANSFER" | "CARD" | "MERCADOPAGO" | "CREDIT" | "OTHER";
+    date?: string | undefined;
     notes?: string | null | undefined;
     clientId?: string | null | undefined;
     quoteId?: string | null | undefined;
-    date?: string | undefined;
 }, {
     items: {
         description: string;
@@ -188,11 +194,11 @@ export declare const saleSchema: z.ZodObject<{
         productId?: string | null | undefined;
     }[];
     paymentMethod: "CASH" | "TRANSFER" | "CARD" | "MERCADOPAGO" | "CREDIT" | "OTHER";
+    date?: string | undefined;
     notes?: string | null | undefined;
     clientId?: string | null | undefined;
     discount?: number | undefined;
     quoteId?: string | null | undefined;
-    date?: string | undefined;
 }>;
 export declare const purchaseItemSchema: z.ZodObject<{
     productId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
@@ -237,8 +243,8 @@ export declare const purchaseSchema: z.ZodObject<{
         unitCost: number;
         productId?: string | null | undefined;
     }[];
-    notes?: string | null | undefined;
     date?: string | undefined;
+    notes?: string | null | undefined;
     supplierId?: string | null | undefined;
 }, {
     items: {
@@ -247,8 +253,8 @@ export declare const purchaseSchema: z.ZodObject<{
         unitCost: number;
         productId?: string | null | undefined;
     }[];
-    notes?: string | null | undefined;
     date?: string | undefined;
+    notes?: string | null | undefined;
     supplierId?: string | null | undefined;
 }>;
 export declare const stockAdjustmentSchema: z.ZodObject<{

@@ -2,9 +2,10 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { Tag, Pencil, Trash2, Plus, Check, X } from 'lucide-react'
+import { Tag, Pencil, Trash2, Plus, Check, X, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { ImportModal } from '@/components/shared/ImportModal'
 
 interface Category {
   id: string
@@ -18,6 +19,7 @@ export default function CategoriesPage() {
   const [editId, setEditId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
   const [error, setError] = useState('')
+  const [showImport, setShowImport] = useState(false)
 
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ['categories'],
@@ -69,6 +71,10 @@ export default function CategoriesPage() {
           placeholder="Nueva categoría..."
           className="flex-1 px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
         />
+        <Button variant="secondary" type="button" onClick={() => setShowImport(true)} className="flex items-center gap-1.5">
+          <Upload size={15} />
+          <span className="hidden sm:inline">Importar</span>
+        </Button>
         <Button type="submit" loading={create.isPending} disabled={!newName.trim()}>
           <Plus size={16} /> Agregar
         </Button>
@@ -160,6 +166,13 @@ export default function CategoriesPage() {
           ))}
         </div>
       )}
+
+      <ImportModal
+        open={showImport}
+        onClose={() => setShowImport(false)}
+        entity="categories"
+        onSuccess={() => { qc.invalidateQueries({ queryKey: ['categories'] }); setShowImport(false) }}
+      />
     </div>
   )
 }

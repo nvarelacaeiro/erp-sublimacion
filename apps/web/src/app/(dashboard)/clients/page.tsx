@@ -1,12 +1,14 @@
 'use client'
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient } from '@/hooks/useClients'
 import { formatCurrency } from '@/lib/utils'
-import { Users, Search, Pencil, Trash2, Phone, Mail } from 'lucide-react'
+import { Users, Search, Pencil, Trash2, Phone, Mail, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { ImportModal } from '@/components/shared/ImportModal'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { clientSchema, type ClientInput } from '@erp/shared'
@@ -31,9 +33,10 @@ function ClientForm({
   return (
     <form onSubmit={handleSubmit(onSave)} className="p-5 space-y-4">
       <Input label="Nombre *" error={errors.name?.message} {...register('name')} />
+      <Input label="Razón social" {...register('businessName')} />
       <div className="grid grid-cols-2 gap-3">
         <Input label="Teléfono" type="tel" {...register('phone')} />
-        <Input label="Email" type="email" {...register('email')} />
+        <Input label="Email" type="email" error={errors.email?.message} {...register('email')} />
       </div>
       <Input label="CUIT / DNI" {...register('taxId')} />
       <Input label="Dirección" {...register('address')} />
@@ -54,9 +57,11 @@ function ClientForm({
 }
 
 export default function ClientsPage() {
+  const qc = useQueryClient()
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Client | null>(null)
   const [showForm, setShowForm] = useState(false)
+  const [showImport, setShowImport] = useState(false)
 
   const { data: clients = [], isLoading } = useClients(search || undefined)
   const createClient = useCreateClient()
@@ -90,6 +95,10 @@ export default function ClientsPage() {
             className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
           />
         </div>
+        <Button variant="secondary" onClick={() => setShowImport(true)} className="flex items-center gap-1.5">
+          <Upload size={15} />
+          <span className="hidden sm:inline">Importar</span>
+        </Button>
         <Button onClick={openCreate}>Nuevo</Button>
       </div>
 
@@ -170,6 +179,13 @@ export default function ClientsPage() {
           loading={createClient.isPending || updateClient.isPending}
         />
       </Modal>
+
+      <ImportModal
+        open={showImport}
+        onClose={() => setShowImport(false)}
+        entity="clients"
+        onSuccess={() => { qc.invalidateQueries({ queryKey: ['clients'] }); setShowImport(false) }}
+      />
     </div>
   )
 }

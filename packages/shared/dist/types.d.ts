@@ -52,6 +52,7 @@ export interface Product {
 export interface Client {
     id: string;
     name: string;
+    businessName: string | null;
     email: string | null;
     phone: string | null;
     address: string | null;
@@ -73,6 +74,9 @@ export interface Quote {
     number: number;
     clientId: string | null;
     clientName: string | null;
+    clientBusinessName: string | null;
+    clientEmail: string | null;
+    clientPhone: string | null;
     userId: string;
     userName: string;
     date: string;

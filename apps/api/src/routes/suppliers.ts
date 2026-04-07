@@ -74,4 +74,40 @@ export async function supplierRoutes(app: FastifyInstance) {
       return handleError(reply, err)
     }
   })
+
+  // POST /api/suppliers/bulk-import
+  app.post('/bulk-import', authenticate, async (request, reply) => {
+    try {
+      const { companyId } = request.user as any
+      const { rows } = request.body as { rows: any[] }
+      if (!Array.isArray(rows) || rows.length === 0) {
+        return reply.code(400).send({ error: 'Bad Request', message: 'No hay filas para importar', statusCode: 400 })
+      }
+
+      const created: string[] = []
+      const errors: { row: number; message: string }[] = []
+
+      for (let i = 0; i < rows.length; i++) {
+        try {
+          const r = rows[i]
+          const parsed = supplierSchema.parse({
+            name: String(r.name ?? '').trim(),
+            email: r.email ? String(r.email).trim() : null,
+            phone: r.phone ?? r.telefono ?? null,
+            address: r.address ?? r.direccion ?? null,
+            taxId: r.taxId ?? r.tax_id ?? r.cuit ?? null,
+            notes: r.notes ?? r.notas ?? null,
+          })
+          await prisma.supplier.create({ data: { ...parsed, companyId } })
+          created.push(parsed.name)
+        } catch (err: any) {
+          errors.push({ row: i + 2, message: err?.errors?.[0]?.message ?? err.message ?? 'Error desconocido' })
+        }
+      }
+
+      return reply.code(201).send({ data: { created: created.length, errors } })
+    } catch (err) {
+      return handleError(reply, err)
+    }
+  })
 }

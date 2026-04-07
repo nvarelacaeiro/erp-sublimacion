@@ -22,7 +22,8 @@ export const productSchema = z.object({
 // ── Cliente ───────────────────────────────────────────────────
 export const clientSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido').max(100),
-  email: z.string().email().nullable().optional(),
+  businessName: z.string().max(150).nullable().optional(),
+  email: z.string().email('Email inválido').nullable().optional().or(z.literal('')).transform(v => v === '' ? null : v),
   phone: z.string().max(30).nullable().optional(),
   address: z.string().max(200).nullable().optional(),
   taxId: z.string().max(30).nullable().optional(),

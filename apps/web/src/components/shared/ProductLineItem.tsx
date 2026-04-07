@@ -55,7 +55,8 @@ export function ProductLineItem({
     queryKey: ['product-config', item.productId],
     queryFn: () => api.get<{ items: ConfigItem[]; pricingRules: any[] }>(`/api/products/${item.productId}/items`),
     enabled: !!item.productId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
+    gcTime: 0,
   })
 
   const configItems = productConfig?.items ?? []

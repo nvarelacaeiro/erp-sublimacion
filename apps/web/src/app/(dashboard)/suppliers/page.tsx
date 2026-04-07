@@ -1,11 +1,13 @@
 'use client'
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useSuppliers, useCreateSupplier, useUpdateSupplier, useDeleteSupplier } from '@/hooks/useSuppliers'
-import { Truck, Search, Pencil, Trash2, Phone, Mail } from 'lucide-react'
+import { Truck, Search, Pencil, Trash2, Phone, Mail, Upload } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { ImportModal } from '@/components/shared/ImportModal'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { supplierSchema, type SupplierInput } from '@erp/shared'
@@ -49,9 +51,11 @@ function SupplierForm({
 }
 
 export default function SuppliersPage() {
+  const qc = useQueryClient()
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<any>(null)
   const [showForm, setShowForm] = useState(false)
+  const [showImport, setShowImport] = useState(false)
 
   const { data: suppliers = [], isLoading } = useSuppliers(search || undefined)
   const create = useCreateSupplier()
@@ -80,6 +84,10 @@ export default function SuppliersPage() {
             className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500"
           />
         </div>
+        <Button variant="secondary" onClick={() => setShowImport(true)} className="flex items-center gap-1.5">
+          <Upload size={15} />
+          <span className="hidden sm:inline">Importar</span>
+        </Button>
         <Button onClick={openCreate}>Nuevo</Button>
       </div>
 
@@ -153,6 +161,13 @@ export default function SuppliersPage() {
           loading={create.isPending || update.isPending}
         />
       </Modal>
+
+      <ImportModal
+        open={showImport}
+        onClose={() => setShowImport(false)}
+        entity="suppliers"
+        onSuccess={() => { qc.invalidateQueries({ queryKey: ['suppliers'] }); setShowImport(false) }}
+      />
     </div>
   )
 }

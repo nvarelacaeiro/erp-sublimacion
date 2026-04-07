@@ -55,4 +55,38 @@ export async function categoryRoutes(app: FastifyInstance) {
       return handleError(reply, err)
     }
   })
+
+  // POST /api/categories/bulk-import
+  app.post('/bulk-import', authenticate, async (request, reply) => {
+    try {
+      const { companyId } = request.user as any
+      const { rows } = request.body as { rows: any[] }
+      if (!Array.isArray(rows) || rows.length === 0) {
+        return reply.code(400).send({ error: 'Bad Request', message: 'No hay filas para importar', statusCode: 400 })
+      }
+
+      const created: string[] = []
+      const errors: { row: number; message: string }[] = []
+
+      for (let i = 0; i < rows.length; i++) {
+        try {
+          const name = String(rows[i].name ?? rows[i].nombre ?? '').trim()
+          if (!name) throw new Error('El nombre es requerido')
+          const existing = await prisma.category.findFirst({
+            where: { companyId, name: { equals: name, mode: 'insensitive' } },
+          })
+          if (!existing) {
+            await prisma.category.create({ data: { companyId, name } })
+            created.push(name)
+          }
+        } catch (err: any) {
+          errors.push({ row: i + 2, message: err.message ?? 'Error desconocido' })
+        }
+      }
+
+      return reply.code(201).send({ data: { created: created.length, errors } })
+    } catch (err) {
+      return handleError(reply, err)
+    }
+  })
 }

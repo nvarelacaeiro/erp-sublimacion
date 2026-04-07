@@ -1,18 +1,22 @@
 'use client'
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@/hooks/useProducts'
 import { api } from '@/lib/api'
-import { Package, Search, AlertTriangle, Pencil, Trash2, Settings2, MessageCircle } from 'lucide-react'
+import { Package, Search, AlertTriangle, Pencil, Trash2, Settings2, MessageCircle, Upload } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { ProductForm, type ProductFormExtras } from '@/components/products/ProductForm'
+import { ImportModal } from '@/components/shared/ImportModal'
 import type { Product } from '@erp/shared'
 
 export default function ProductsPage() {
+  const qc = useQueryClient()
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Product | null>(null)
+  const [showImport, setShowImport] = useState(false)
   const [showForm, setShowForm] = useState(false)
 
   const { data: products = [], isLoading } = useProducts({ search: search || undefined })
@@ -94,6 +98,10 @@ export default function ProductsPage() {
             <MessageCircle size={14} />
           </button>
         )}
+        <Button variant="secondary" onClick={() => setShowImport(true)} className="flex items-center gap-1.5">
+          <Upload size={15} />
+          <span className="hidden sm:inline">Importar</span>
+        </Button>
         <Button onClick={openCreate}>Nuevo</Button>
       </div>
 
@@ -166,6 +174,13 @@ export default function ProductsPage() {
           loading={createProduct.isPending || updateProduct.isPending}
         />
       </Modal>
+
+      <ImportModal
+        open={showImport}
+        onClose={() => setShowImport(false)}
+        entity="products"
+        onSuccess={() => { qc.invalidateQueries({ queryKey: ['products'] }); setShowImport(false) }}
+      />
     </div>
   )
 }

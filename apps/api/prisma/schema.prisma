@@ -181,17 +181,18 @@ model StockMovement {
 // ============================================================
 
 model Client {
-  id        String   @id @default(cuid())
-  companyId String   @map("company_id")
-  name      String
-  email     String?
-  phone     String?
-  address   String?
-  taxId     String?  @map("tax_id")
-  notes     String?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(cuid())
+  companyId    String   @map("company_id")
+  name         String
+  businessName String?  @map("business_name")
+  email        String?
+  phone        String?
+  address      String?
+  taxId        String?  @map("tax_id")
+  notes        String?
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   company      Company             @relation(fields: [companyId], references: [id])
   quotes       Quote[]

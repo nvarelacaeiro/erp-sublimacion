@@ -126,6 +126,54 @@ export async function productRoutes(app: FastifyInstance) {
     }
   })
 
+  // POST /api/products/bulk-import
+  app.post('/bulk-import', authenticate, async (request, reply) => {
+    try {
+      const { companyId } = request.user as any
+      const { rows } = request.body as { rows: any[] }
+      if (!Array.isArray(rows) || rows.length === 0) {
+        return reply.code(400).send({ error: 'Bad Request', message: 'No hay filas para importar', statusCode: 400 })
+      }
+
+      const created: string[] = []
+      const errors: { row: number; message: string }[] = []
+
+      for (let i = 0; i < rows.length; i++) {
+        try {
+          const r = rows[i]
+          const parsed = productSchema.parse({
+            name: String(r.name ?? '').trim(),
+            sku: r.sku ? String(r.sku).trim() : null,
+            description: r.description ? String(r.description).trim() : null,
+            cost: Number(r.cost ?? 0),
+            price: Number(r.price ?? 0),
+            stock: Number(r.stock ?? 0),
+            minStock: Number(r.minStock ?? r.min_stock ?? 0),
+            unit: r.unit ? String(r.unit).trim() : 'un',
+          })
+
+          // Resolve categoryId by name if provided
+          let categoryId: string | null = null
+          if (r.category) {
+            const cat = await prisma.category.findFirst({
+              where: { companyId, name: { equals: String(r.category).trim(), mode: 'insensitive' } },
+            })
+            if (cat) categoryId = cat.id
+          }
+
+          await prisma.product.create({ data: { ...parsed, companyId, categoryId } })
+          created.push(parsed.name)
+        } catch (err: any) {
+          errors.push({ row: i + 2, message: err?.errors?.[0]?.message ?? err.message ?? 'Error desconocido' })
+        }
+      }
+
+      return reply.code(201).send({ data: { created: created.length, errors } })
+    } catch (err) {
+      return handleError(reply, err)
+    }
+  })
+
   // GET /api/products/:id/movements
   app.get('/:id/movements', authenticate, async (request, reply) => {
     try {

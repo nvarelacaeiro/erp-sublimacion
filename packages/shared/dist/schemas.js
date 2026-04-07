@@ -22,7 +22,8 @@ exports.productSchema = zod_1.z.object({
 // ── Cliente ───────────────────────────────────────────────────
 exports.clientSchema = zod_1.z.object({
     name: zod_1.z.string().min(1, 'El nombre es requerido').max(100),
-    email: zod_1.z.string().email().nullable().optional(),
+    businessName: zod_1.z.string().max(150).nullable().optional(),
+    email: zod_1.z.string().email('Email inválido').nullable().optional().or(zod_1.z.literal('')).transform(v => v === '' ? null : v),
     phone: zod_1.z.string().max(30).nullable().optional(),
     address: zod_1.z.string().max(200).nullable().optional(),
     taxId: zod_1.z.string().max(30).nullable().optional(),

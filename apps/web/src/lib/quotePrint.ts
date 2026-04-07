@@ -1,7 +1,10 @@
 import { formatCurrency, formatDate } from '@/lib/utils'
 
 export function openQuotePrintWindow(quote: any) {
-  const client = quote.clientName ?? 'Sin cliente'
+  const clientName = quote.clientName ?? 'Sin cliente'
+  const clientBusinessName = quote.clientBusinessName ?? null
+  const clientEmail = quote.clientEmail ?? null
+  const clientPhone = quote.clientPhone ?? null
   const items = quote.items ?? []
   const notes = quote.notes ?? ''
 
@@ -33,6 +36,7 @@ export function openQuotePrintWindow(quote: any) {
     .client-section { margin-bottom: 32px; }
     .section-label { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
     .client-name { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+    .client-detail { font-size: 12px; color: #6b7280; margin-top: 2px; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
     thead tr { background: #F0EEE1; }
     thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; color: #5e6d56; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #ADB79C; }
@@ -80,7 +84,10 @@ export function openQuotePrintWindow(quote: any) {
 
   <div class="client-section">
     <div class="section-label">Cliente</div>
-    <div class="client-name">${client}</div>
+    <div class="client-name">${clientName}</div>
+    ${clientBusinessName ? `<div class="client-detail">${clientBusinessName}</div>` : ''}
+    ${clientEmail ? `<div class="client-detail">${clientEmail}</div>` : ''}
+    ${clientPhone ? `<div class="client-detail">${clientPhone}</div>` : ''}
   </div>
 
   <table>

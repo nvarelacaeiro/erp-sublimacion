@@ -36,7 +36,7 @@ export async function quoteRoutes(app: FastifyInstance) {
           }),
         },
         include: {
-          client: { select: { id: true, name: true } },
+          client: { select: { id: true, name: true, businessName: true, email: true, phone: true } },
           user: { select: { id: true, name: true } },
           items: { select: { description: true, quantity: true, unitPrice: true }, orderBy: { id: 'asc' } },
         },
@@ -51,6 +51,9 @@ export async function quoteRoutes(app: FastifyInstance) {
           discount: Number(q.discount),
           total: Number(q.total),
           clientName: q.client?.name ?? null,
+          clientBusinessName: q.client?.businessName ?? null,
+          clientEmail: q.client?.email ?? null,
+          clientPhone: q.client?.phone ?? null,
           userName: q.user.name,
         })),
       })
