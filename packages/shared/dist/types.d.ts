@@ -47,6 +47,8 @@ export interface Product {
     minStock: number;
     unit: string;
     active: boolean;
+    alertSent: boolean;
+    alertSentAt: string | null;
     createdAt: string;
 }
 export interface Client {

@@ -215,7 +215,17 @@ export async function productRoutes(app: FastifyInstance) {
       })
 
       const updated = await prisma.product.findUnique({ where: { id } })
-      return reply.send({ data: { stock: Number(updated!.stock) } })
+      if (!updated) throw new NotFoundError('Producto')
+
+      // Reset stock alert if stock is now above minimum
+      if (Number(updated.stock) > Number(updated.minStock) && updated.alertSent) {
+        await prisma.product.update({
+          where: { id },
+          data: { alertSent: false, alertSentAt: null },
+        })
+      }
+
+      return reply.send({ data: { stock: Number(updated.stock) } })
     } catch (err) {
       return handleError(reply, err)
     }
