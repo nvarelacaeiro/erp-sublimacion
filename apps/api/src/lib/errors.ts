@@ -1,5 +1,6 @@
 import { FastifyReply } from 'fastify'
 import { ZodError } from 'zod'
+import { Prisma } from '@prisma/client'
 
 export function handleError(reply: FastifyReply, error: unknown) {
   if (error instanceof ZodError) {
@@ -16,6 +17,23 @@ export function handleError(reply: FastifyReply, error: unknown) {
       message: error.message,
       statusCode: error.statusCode,
     })
+  }
+
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    if (error.code === 'P2002') {
+      return reply.code(409).send({
+        error: 'Conflict',
+        message: 'Ya existe un registro con ese nombre',
+        statusCode: 409,
+      })
+    }
+    if (error.code === 'P2025') {
+      return reply.code(404).send({
+        error: 'NotFound',
+        message: 'Registro no encontrado',
+        statusCode: 404,
+      })
+    }
   }
 
   console.error(error)

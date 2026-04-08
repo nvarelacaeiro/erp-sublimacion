@@ -22,6 +22,18 @@ export async function categoryRoutes(app: FastifyInstance) {
     try {
       const { companyId } = request.user as any
       const { name } = categorySchema.parse(request.body)
+
+      const existing = await prisma.category.findFirst({
+        where: { companyId, name: { equals: name, mode: 'insensitive' } },
+      })
+      if (existing) {
+        return reply.code(409).send({
+          error: 'Conflict',
+          message: 'Ya existe una categoría con ese nombre',
+          statusCode: 409,
+        })
+      }
+
       const category = await prisma.category.create({ data: { companyId, name } })
       return reply.code(201).send({ data: category })
     } catch (err) {
