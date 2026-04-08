@@ -46,7 +46,8 @@ export default function CategoriesPage() {
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
-    if (!newName.trim()) return
+    if (!newName.trim()) { setError('Escribí un nombre para la categoría'); return }
+    setError('')
     create.mutate(newName.trim())
   }
 
@@ -75,7 +76,7 @@ export default function CategoriesPage() {
           <Upload size={15} />
           <span className="hidden sm:inline">Importar</span>
         </Button>
-        <Button type="submit" loading={create.isPending} disabled={!newName.trim()}>
+        <Button type="submit" loading={create.isPending}>
           <Plus size={16} /> Agregar
         </Button>
       </form>
