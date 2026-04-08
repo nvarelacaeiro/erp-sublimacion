@@ -27,7 +27,7 @@ export function useCreateSale() {
 export function useCancelSale() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => api.patch(`/api/sales/${id}/cancel`),
+    mutationFn: (id: string) => api.patch(`/api/sales/${id}/cancel`, {}),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['sales'] }),
   })
 }
