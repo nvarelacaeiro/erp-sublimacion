@@ -146,7 +146,7 @@ function PurchaseForm({
                       className="w-full text-left px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-slate-700 dark:text-slate-200 flex justify-between text-sm"
                     >
                       <span>{p.name}</span>
-                      <span className="text-gray-500">Costo: {formatCurrency(p.cost)}</span>
+                      <span className="text-gray-500 dark:text-slate-400">Costo: {formatCurrency(p.cost)}</span>
                     </button>
                   ))}
                 </div>
@@ -173,12 +173,12 @@ function PurchaseForm({
                 />
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold">{formatCurrency(item.quantity * item.unitCost)}</span>
+                <span className="text-sm font-semibold dark:text-slate-100">{formatCurrency(item.quantity * item.unitCost)}</span>
                 {items.length > 1 && (
                   <button
                     type="button"
                     onClick={() => setItems(prev => prev.filter((_, i) => i !== idx))}
-                    className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500"
+                    className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 dark:text-slate-500 hover:text-red-500"
                   >
                     <Trash2 size={14} />
                   </button>
@@ -191,7 +191,7 @@ function PurchaseForm({
 
       {/* Total + estado de pago */}
       <div className="bg-gray-50 dark:bg-slate-900 rounded-xl p-4 space-y-3">
-        <div className="flex justify-between text-base font-bold text-gray-900">
+        <div className="flex justify-between text-base font-bold text-gray-900 dark:text-slate-100">
           <span>Total</span>
           <span>{formatCurrency(total)}</span>
         </div>
@@ -200,7 +200,7 @@ function PurchaseForm({
             type="checkbox"
             checked={paid}
             onChange={e => setPaid(e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+            className="w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-primary-600 focus:ring-primary-500 dark:bg-slate-700"
           />
           <span className="text-sm text-gray-700 dark:text-slate-300">Compra pagada (genera egreso inmediato)</span>
         </label>
@@ -368,7 +368,7 @@ export default function PurchasesPage() {
                     <div key={i} className="flex items-start justify-between gap-2 text-sm">
                       <div className="flex-1 min-w-0">
                         <span className="text-gray-800 dark:text-slate-200">{item.description}</span>
-                        <span className="text-gray-400 ml-1.5">×{item.quantity}</span>
+                        <span className="text-gray-400 dark:text-slate-500 ml-1.5">×{item.quantity}</span>
                       </div>
                       <div className="text-right shrink-0">
                         <div className="text-gray-900 dark:text-slate-100 font-medium">{formatCurrency(Number(item.unitCost) * Number(item.quantity))}</div>

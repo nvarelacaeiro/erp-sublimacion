@@ -37,7 +37,7 @@ export default function SalesPage() {
           onChange={e => setFrom(e.target.value)}
           className="text-sm border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
         />
-        <span className="text-sm text-gray-400">a</span>
+        <span className="text-sm text-gray-400 dark:text-slate-500">a</span>
         <input
           type="date"
           value={to}
@@ -47,7 +47,7 @@ export default function SalesPage() {
         {(from || to) && (
           <button
             onClick={() => { setFrom(''); setTo('') }}
-            className="text-xs text-gray-500 hover:text-gray-700"
+            className="text-xs text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200"
           >
             Limpiar
           </button>
@@ -96,14 +96,14 @@ export default function SalesPage() {
                       label={SALE_STATUS_LABELS[sale.status]}
                       className={SALE_STATUS_COLORS[sale.status]}
                     />
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-gray-500 dark:text-slate-400">
                       {PAYMENT_METHOD_LABELS[sale.paymentMethod]}
                     </span>
                   </div>
                   <div className="text-sm text-gray-700 dark:text-slate-300">
                     {sale.clientName ?? 'Sin cliente'}
                   </div>
-                  <div className="text-xs text-gray-400 mt-0.5">
+                  <div className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">
                     {formatDate(sale.date)}
                   </div>
                 </div>
@@ -114,7 +114,7 @@ export default function SalesPage() {
                   {sale.status !== 'CANCELLED' && (
                     <button
                       onClick={() => handleCancel(sale.id, sale.number)}
-                      className="mt-1 text-xs text-gray-400 hover:text-red-500 flex items-center gap-1 ml-auto"
+                      className="mt-1 text-xs text-gray-400 dark:text-slate-500 hover:text-red-500 dark:hover:text-red-400 flex items-center gap-1 ml-auto"
                     >
                       <XCircle size={12} /> Cancelar
                     </button>

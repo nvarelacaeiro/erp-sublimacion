@@ -22,7 +22,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!hydrated || !user) return null
 
   return (
-    <div className="flex h-dvh bg-gray-50">
+    <div className="flex h-dvh bg-[#F0EEE1] dark:bg-slate-900">
       <Sidebar />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">

@@ -129,14 +129,14 @@ export default function QuotesPage() {
                     <button
                       onClick={() => handleDownloadPDF(quote)}
                       title="Descargar PDF"
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50"
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-600/20 dark:hover:text-primary-400"
                     >
                       <Download size={14} />
                     </button>
                     <button
                       onClick={() => handleWhatsApp(quote)}
                       title="Compartir por WhatsApp"
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50"
+                      className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20 dark:hover:text-green-400"
                     >
                       <MessageCircle size={14} />
                     </button>
@@ -160,7 +160,7 @@ export default function QuotesPage() {
                     </div>
                   ))}
                   {Number((quote as any).discount) > 0 && (
-                    <div className="flex justify-between text-xs text-red-500 pt-1 border-t border-gray-100">
+                    <div className="flex justify-between text-xs text-red-500 dark:text-red-400 pt-1 border-t border-gray-100 dark:border-slate-700">
                       <span>Descuento {(quote as any).discount}%</span>
                       <span>-{formatCurrency(Number((quote as any).subtotal) * Number((quote as any).discount) / 100)}</span>
                     </div>

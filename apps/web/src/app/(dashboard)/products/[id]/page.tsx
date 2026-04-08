@@ -72,7 +72,7 @@ function ItemRow({
           <option value="BOOLEAN">Sí/No</option>
         </select>
         <button onClick={save} className="p-1 text-green-600 hover:bg-green-50 rounded"><Check size={16} /></button>
-        <button onClick={() => setEditing(false)} className="p-1 text-gray-500 hover:bg-gray-100 rounded"><X size={16} /></button>
+        <button onClick={() => setEditing(false)} className="p-1 text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700 rounded"><X size={16} /></button>
       </div>
     )
   }
@@ -257,7 +257,7 @@ export default function ProductConfigPage() {
   }, [calcQty, calcItems, config])
 
   if (isLoading) {
-    return <div className="p-6 text-gray-500 text-sm">Cargando...</div>
+    return <div className="p-6 text-gray-500 dark:text-slate-400 text-sm">Cargando...</div>
   }
 
   const items = config?.items ?? []

@@ -196,7 +196,7 @@ export default function UsersPage() {
                   <span className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">{u.name}</span>
                   <Badge
                     label={u.role === 'ADMIN' ? 'Admin' : 'Operador'}
-                    className={u.role === 'ADMIN' ? 'bg-primary-100 text-primary-700' : 'bg-gray-100 text-gray-600'}
+                    className={u.role === 'ADMIN' ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' : 'bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-300'}
                   />
                   {!u.active && (
                     <Badge label="Inactivo" className="bg-red-100 text-red-600" />
