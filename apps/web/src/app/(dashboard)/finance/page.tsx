@@ -3,15 +3,362 @@ import { useState } from 'react'
 import {
   useAccountsReceivable, useAccountsPayable,
   usePayReceivable, usePayPayable, useCreateTransaction, useTransactions,
+  useFinanceAnalytics,
 } from '@/hooks/useFinance'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { CreditCard, TrendingUp, TrendingDown, CheckCircle, Plus } from 'lucide-react'
+import { CreditCard, TrendingUp, TrendingDown, CheckCircle, Plus, BarChart2, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
+import {
+  ResponsiveContainer, LineChart, Line, BarChart, Bar,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  PieChart, Pie, Cell,
+} from 'recharts'
 
-type Tab = 'receivable' | 'payable' | 'transactions'
+type Tab = 'analytics' | 'receivable' | 'payable' | 'transactions'
+type Granularity = 'day' | 'week' | 'month' | 'year'
+
+const GRANULARITY_OPTIONS: { value: Granularity; label: string }[] = [
+  { value: 'day', label: 'Diario' },
+  { value: 'week', label: 'Semanal' },
+  { value: 'month', label: 'Mensual' },
+  { value: 'year', label: 'Anual' },
+]
+
+const PIE_COLORS = ['#8b5cf6', '#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#f97316']
+
+function fmt(n: number) {
+  if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `$${(n / 1_000).toFixed(1)}k`
+  return formatCurrency(n)
+}
+
+function SummaryCard({
+  label, value, sub, color = 'default',
+}: {
+  label: string
+  value: string
+  sub?: string
+  color?: 'green' | 'red' | 'default' | 'purple'
+}) {
+  const colors = {
+    green: 'text-green-600 dark:text-green-400',
+    red: 'text-red-500 dark:text-red-400',
+    purple: 'text-purple-600 dark:text-purple-400',
+    default: 'text-gray-900 dark:text-slate-100',
+  }
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+      <div className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">{label}</div>
+      <div className={`text-xl font-bold ${colors[color]}`}>{value}</div>
+      {sub && <div className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{sub}</div>}
+    </div>
+  )
+}
+
+function AnalyticsTab() {
+  const today = new Date()
+  const firstDay = new Date(today.getFullYear(), today.getMonth(), 1)
+  const [from, setFrom] = useState(firstDay.toISOString().slice(0, 10))
+  const [to, setTo] = useState(today.toISOString().slice(0, 10))
+  const [granularity, setGranularity] = useState<Granularity>('month')
+
+  const { data, isLoading } = useFinanceAnalytics({ from, to, granularity })
+
+  const summary = data?.summary
+  const timeSeries = data?.timeSeries ?? []
+  const topProducts = data?.topProducts ?? []
+  const topClients = data?.topClients ?? []
+  const expenseBreakdown = data?.expenseBreakdown ?? []
+
+  return (
+    <div className="space-y-5">
+      {/* Filtros */}
+      <div className="flex flex-wrap gap-3 items-center bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-3">
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-500 dark:text-slate-400">Desde</label>
+          <input
+            type="date"
+            value={from}
+            onChange={e => setFrom(e.target.value)}
+            className="text-sm border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 dark:text-slate-100"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-gray-500 dark:text-slate-400">Hasta</label>
+          <input
+            type="date"
+            value={to}
+            onChange={e => setTo(e.target.value)}
+            className="text-sm border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 dark:text-slate-100"
+          />
+        </div>
+        <select
+          value={granularity}
+          onChange={e => setGranularity(e.target.value as Granularity)}
+          className="text-sm border border-gray-300 dark:border-slate-600 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-700 dark:text-slate-100"
+        >
+          {GRANULARITY_OPTIONS.map(o => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+        <div className="flex gap-2 ml-auto flex-wrap">
+          {[
+            { label: 'Hoy', days: 0 },
+            { label: '7d', days: 7 },
+            { label: '30d', days: 30 },
+            { label: '90d', days: 90 },
+            { label: 'Este año', days: -1 },
+          ].map(({ label, days }) => (
+            <button
+              key={label}
+              onClick={() => {
+                const t = new Date()
+                const f = new Date()
+                if (days === -1) {
+                  f.setMonth(0); f.setDate(1)
+                  setGranularity('month')
+                } else if (days === 0) {
+                  setGranularity('day')
+                } else {
+                  f.setDate(f.getDate() - days)
+                  setGranularity(days <= 7 ? 'day' : days <= 30 ? 'day' : 'month')
+                }
+                setFrom(f.toISOString().slice(0, 10))
+                setTo(t.toISOString().slice(0, 10))
+              }}
+              className="text-xs px-2.5 py-1 rounded-lg border border-gray-200 dark:border-slate-600 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-24 bg-white dark:bg-slate-800 rounded-xl border dark:border-slate-700 animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <>
+          {/* Summary cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <SummaryCard
+              label="Ingresos"
+              value={fmt(summary?.totalIncome ?? 0)}
+              sub={`${summary?.salesCount ?? 0} ventas`}
+              color="green"
+            />
+            <SummaryCard
+              label="Egresos"
+              value={fmt(summary?.totalExpenses ?? 0)}
+              color="red"
+            />
+            <SummaryCard
+              label="Ganancia neta"
+              value={fmt(summary?.netProfit ?? 0)}
+              sub={`Margen ${(summary?.netMargin ?? 0).toFixed(1)}%`}
+              color={(summary?.netProfit ?? 0) >= 0 ? 'green' : 'red'}
+            />
+            <SummaryCard
+              label="Ticket promedio"
+              value={fmt(summary?.avgTicket ?? 0)}
+              color="purple"
+            />
+          </div>
+
+          {/* Time-series chart */}
+          {timeSeries.length > 0 && (
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-slate-200 mb-4">Evolución temporal</h3>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={timeSeries} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" className="dark:stroke-slate-700" />
+                  <XAxis
+                    dataKey="period"
+                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: '#9ca3af' }}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={v => fmt(v)}
+                    width={60}
+                  />
+                  <Tooltip
+                    formatter={(v: number, name: string) => [
+                      formatCurrency(v),
+                      name === 'income' ? 'Ingresos' : name === 'expense' ? 'Egresos' : 'Ganancia',
+                    ]}
+                    contentStyle={{
+                      borderRadius: 8,
+                      border: '1px solid #e5e7eb',
+                      fontSize: 12,
+                    }}
+                  />
+                  <Legend
+                    formatter={v => v === 'income' ? 'Ingresos' : v === 'expense' ? 'Egresos' : 'Ganancia'}
+                    iconType="circle"
+                    iconSize={8}
+                    wrapperStyle={{ fontSize: 12 }}
+                  />
+                  <Bar dataKey="income" fill="#10b981" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="expense" fill="#ef4444" radius={[3, 3, 0, 0]} />
+                  <Line
+                    type="monotone"
+                    dataKey="profit"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Top products + Top clients */}
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Top products */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-slate-200 mb-3">Top productos</h3>
+              {topProducts.length === 0 ? (
+                <p className="text-sm text-gray-400 dark:text-slate-500 text-center py-6">Sin datos</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {topProducts.slice(0, 5).map((p: any, i: number) => {
+                    const maxRev = topProducts[0]?.revenue ?? 1
+                    const pct = Math.round((p.revenue / maxRev) * 100)
+                    return (
+                      <div key={i}>
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-xs text-gray-700 dark:text-slate-300 truncate flex-1 mr-2">{p.name}</span>
+                          <span className="text-xs font-semibold text-gray-900 dark:text-slate-100 shrink-0">{fmt(p.revenue)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div className="h-full bg-primary-500 rounded-full" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="text-xs text-gray-400 dark:text-slate-500 shrink-0 w-12 text-right">×{Number(p.qty).toFixed(0)}</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Top clients */}
+            <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-slate-200 mb-3">Top clientes</h3>
+              {topClients.length === 0 ? (
+                <p className="text-sm text-gray-400 dark:text-slate-500 text-center py-6">Sin datos</p>
+              ) : (
+                <div className="space-y-2.5">
+                  {topClients.slice(0, 5).map((c: any, i: number) => {
+                    const maxTotal = topClients[0]?.total ?? 1
+                    const pct = Math.round((c.total / maxTotal) * 100)
+                    return (
+                      <div key={i}>
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-xs text-gray-700 dark:text-slate-300 truncate flex-1 mr-2">{c.name}</span>
+                          <span className="text-xs font-semibold text-gray-900 dark:text-slate-100 shrink-0">{fmt(c.total)}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                            <div className="h-full bg-amber-500 rounded-full" style={{ width: `${pct}%` }} />
+                          </div>
+                          <span className="text-xs text-gray-400 dark:text-slate-500 shrink-0 w-12 text-right">{c.count} vtas</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Expense breakdown + Product profitability */}
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Expense pie */}
+            {expenseBreakdown.length > 0 && (
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+                <h3 className="text-sm font-semibold text-gray-800 dark:text-slate-200 mb-3">Composición de egresos</h3>
+                <div className="flex items-center gap-4">
+                  <ResponsiveContainer width={120} height={120}>
+                    <PieChart>
+                      <Pie
+                        data={expenseBreakdown}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={30}
+                        outerRadius={55}
+                        strokeWidth={2}
+                      >
+                        {expenseBreakdown.map((_: any, idx: number) => (
+                          <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(v: number) => [formatCurrency(v)]}
+                        contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 12 }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex-1 space-y-1.5">
+                    {expenseBreakdown.map((e: any, idx: number) => {
+                      const total = expenseBreakdown.reduce((s: number, x: any) => s + x.value, 0)
+                      const pct = total > 0 ? ((e.value / total) * 100).toFixed(0) : '0'
+                      return (
+                        <div key={idx} className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }} />
+                          <span className="text-xs text-gray-600 dark:text-slate-400 truncate flex-1">{e.name}</span>
+                          <span className="text-xs font-medium text-gray-900 dark:text-slate-200 shrink-0">{pct}%</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Product profitability */}
+            {topProducts.length > 0 && (
+              <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
+                <h3 className="text-sm font-semibold text-gray-800 dark:text-slate-200 mb-3">Rentabilidad por producto</h3>
+                <div className="space-y-2">
+                  <div className="grid grid-cols-3 text-xs text-gray-400 dark:text-slate-500 px-1 mb-1">
+                    <span>Producto</span>
+                    <span className="text-right">Ingresos</span>
+                    <span className="text-right">Ganancia est.</span>
+                  </div>
+                  {topProducts.slice(0, 5).map((p: any, i: number) => (
+                    <div key={i} className="grid grid-cols-3 text-xs items-center px-1 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                      <span className="text-gray-700 dark:text-slate-300 truncate pr-2">{p.name}</span>
+                      <span className="text-right text-gray-900 dark:text-slate-100">{fmt(p.revenue)}</span>
+                      <span className={`text-right font-semibold ${p.profit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-500'}`}>
+                        {p.profit >= 0 ? '+' : ''}{fmt(p.profit)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+// ── PayModal ──────────────────────────────────────────────────────────────────
 
 function PayModal({
   open, onClose, account, type, onPay,
@@ -77,6 +424,8 @@ function PayModal({
     </Modal>
   )
 }
+
+// ── TransactionModal ───────────────────────────────────────────────────────────
 
 function TransactionModal({
   open, onClose, onSave,
@@ -145,8 +494,10 @@ function TransactionModal({
   )
 }
 
+// ── Main page ─────────────────────────────────────────────────────────────────
+
 export default function FinancePage() {
-  const [tab, setTab] = useState<Tab>('receivable')
+  const [tab, setTab] = useState<Tab>('analytics')
   const [payAccount, setPayAccount] = useState<any>(null)
   const [showTxModal, setShowTxModal] = useState(false)
 
@@ -162,6 +513,7 @@ export default function FinancePage() {
   const totalPayable = payable.reduce((s: number, a: any) => s + a.pending, 0)
 
   const TABS: { key: Tab; label: string; count?: number }[] = [
+    { key: 'analytics', label: 'Análisis' },
     { key: 'receivable', label: 'A cobrar', count: receivable.length },
     { key: 'payable', label: 'A pagar', count: payable.length },
     { key: 'transactions', label: 'Movimientos' },
@@ -169,7 +521,7 @@ export default function FinancePage() {
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
-      {/* Resumen */}
+      {/* Resumen rápido (siempre visible) */}
       <div className="grid grid-cols-2 gap-3 mb-5">
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
           <div className="flex items-center gap-2 mb-2 text-green-600">
@@ -188,12 +540,12 @@ export default function FinancePage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-700 p-1 rounded-xl mb-4">
+      <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-700 p-1 rounded-xl mb-4 overflow-x-auto">
         {TABS.map(t => (
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+            className={`flex-1 min-w-max flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
               tab === t.key
                 ? 'bg-white dark:bg-slate-800 text-gray-900 dark:text-slate-100 shadow-sm'
                 : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200'
@@ -210,6 +562,9 @@ export default function FinancePage() {
           </button>
         ))}
       </div>
+
+      {/* Analytics */}
+      {tab === 'analytics' && <AnalyticsTab />}
 
       {/* Cuentas a cobrar */}
       {tab === 'receivable' && (

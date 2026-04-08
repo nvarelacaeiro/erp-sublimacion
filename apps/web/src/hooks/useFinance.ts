@@ -56,3 +56,13 @@ export function useCreateTransaction() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['transactions'] }),
   })
 }
+
+export function useFinanceAnalytics(params?: { from?: string; to?: string; granularity?: string }) {
+  const qs = new URLSearchParams(
+    Object.fromEntries(Object.entries(params ?? {}).filter(([, v]) => v)) as Record<string, string>
+  )
+  return useQuery({
+    queryKey: ['finance-analytics', params],
+    queryFn: () => api.get<any>(`/api/finance/analytics?${qs}`),
+  })
+}
