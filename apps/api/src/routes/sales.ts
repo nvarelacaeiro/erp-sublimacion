@@ -37,6 +37,7 @@ export async function saleRoutes(app: FastifyInstance) {
         include: {
           client: { select: { id: true, name: true } },
           user: { select: { id: true, name: true } },
+          items: { include: { product: { select: { id: true, name: true, sku: true } } } },
         },
         orderBy: { date: 'desc' },
         take: 100,
@@ -50,6 +51,13 @@ export async function saleRoutes(app: FastifyInstance) {
           total: Number(s.total),
           clientName: s.client?.name ?? null,
           userName: s.user.name,
+          items: s.items.map(i => ({
+            ...i,
+            quantity: Number(i.quantity),
+            unitPrice: Number(i.unitPrice),
+            unitCost: Number(i.unitCost),
+            total: Number(i.total),
+          })),
         })),
       })
     } catch (err) {
