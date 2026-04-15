@@ -260,6 +260,7 @@ export async function requisitionRoutes(app: FastifyInstance) {
         select: { email: true },
       }).then(approvers => {
         const emails = approvers.map(u => u.email).filter(Boolean)
+        console.log('[email] destinatarios:', emails)
         return sendRequisitionSubmittedEmail({
           to: emails,
           requisitionNumber: existing.number,
@@ -267,7 +268,11 @@ export async function requisitionRoutes(app: FastifyInstance) {
           requesterName: r.requestedBy.name,
           appUrl: process.env.APP_URL ?? 'https://erp-sublimacion.vercel.app',
         })
-      }).catch(() => { /* nunca rompe el flujo principal */ })
+      }).then(() => {
+        console.log('[email] enviado OK')
+      }).catch((err: any) => {
+        console.error('[email] error al enviar:', err?.message ?? err)
+      })
 
       return reply.send({ data: r })
     } catch (err) {
