@@ -1,13 +1,15 @@
 'use client'
 import Link from 'next/link'
-import { X, Users, Truck, ShoppingCart, CreditCard, LogOut, Tag, UserRound } from 'lucide-react'
+import { X, Users, Truck, ShoppingCart, CreditCard, LogOut, Tag, UserRound, ClipboardList, PackageCheck } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 import { useAuthStore } from '@/store/auth.store'
 
 const EXTRA_ITEMS = [
   { href: '/clients', icon: Users, label: 'Clientes' },
   { href: '/suppliers', icon: Truck, label: 'Proveedores' },
+  { href: '/requisitions', icon: ClipboardList, label: 'Solicitudes' },
   { href: '/purchases', icon: ShoppingCart, label: 'Compras' },
+  { href: '/delivery-notes', icon: PackageCheck, label: 'Remitos' },
   { href: '/categories', icon: Tag, label: 'Categorías' },
   { href: '/finance', icon: CreditCard, label: 'Finanzas' },
   { href: '/users', icon: UserRound, label: 'Usuarios' },

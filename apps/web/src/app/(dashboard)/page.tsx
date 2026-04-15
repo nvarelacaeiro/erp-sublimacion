@@ -1,10 +1,11 @@
 'use client'
 import { useState } from 'react'
 import { useDashboard } from '@/hooks/useSales'
+import { useAuthStore } from '@/store/auth.store'
 import { formatCurrency } from '@/lib/utils'
 import {
   TrendingUp, TrendingDown, DollarSign, FileText,
-  AlertTriangle, Clock, ArrowRight, ChevronLeft, ChevronRight,
+  AlertTriangle, Clock, ArrowRight, ChevronLeft, ChevronRight, ClipboardList,
 } from 'lucide-react'
 import Link from 'next/link'
 import {
@@ -64,6 +65,8 @@ function periodLabel(range: string, navDate: Date): string {
 }
 
 export default function DashboardPage() {
+  const { user } = useAuthStore()
+  const role = user?.role ?? 'SELLER'
   const [range, setRange] = useState('month')
   const [navDate, setNavDate] = useState(new Date())
 
@@ -171,6 +174,37 @@ export default function DashboardPage() {
         <StatCard label="A cobrar" value={formatCurrency(d.totalReceivable ?? 0)} icon={FileText} color="bg-amber-50 dark:bg-amber-600/20 text-amber-600 dark:text-amber-400" href="/finance" />
         <StatCard label="A pagar" value={formatCurrency(d.totalPayable ?? 0)} icon={Clock} color="bg-orange-50 dark:bg-orange-600/20 text-orange-600 dark:text-orange-400" href="/finance" />
       </div>
+
+      {/* Solicitudes KPIs — solo roles con acceso */}
+      {d.requisitions && (role === 'ADMIN' || role === 'APPROVER' || role === 'REQUESTER') && (
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 md:p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100 flex items-center gap-2">
+              <ClipboardList size={16} className="text-primary-600" />
+              Solicitudes de compra
+            </h2>
+            <Link href="/requisitions" className="text-xs text-primary-600 dark:text-primary-400 hover:underline">Ver todas</Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="text-center p-3 rounded-lg bg-gray-50 dark:bg-slate-700/50">
+              <div className="text-xl font-bold text-gray-700 dark:text-slate-200">{d.requisitions.draft}</div>
+              <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Borradores</div>
+            </div>
+            <div className={`text-center p-3 rounded-lg ${d.requisitions.pending > 0 ? 'bg-amber-50 dark:bg-amber-900/20' : 'bg-gray-50 dark:bg-slate-700/50'}`}>
+              <div className={`text-xl font-bold ${d.requisitions.pending > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-gray-700 dark:text-slate-200'}`}>{d.requisitions.pending}</div>
+              <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Pendientes</div>
+            </div>
+            <div className={`text-center p-3 rounded-lg ${d.requisitions.approved > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-50 dark:bg-slate-700/50'}`}>
+              <div className={`text-xl font-bold ${d.requisitions.approved > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-slate-200'}`}>{d.requisitions.approved}</div>
+              <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Aprobadas</div>
+            </div>
+            <div className="text-center p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+              <div className="text-xl font-bold text-blue-600 dark:text-blue-400">{d.requisitions.ordered}</div>
+              <div className="text-xs text-gray-500 dark:text-slate-400 mt-0.5">Ordenadas</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Gráfico + Stock bajo */}
       <div className="grid md:grid-cols-3 gap-4">

@@ -6,6 +6,7 @@ import { handleError, NotFoundError, AppError } from '../lib/errors'
 import { getNextNumber } from '../services/numbering.service'
 import { decreaseStock } from '../services/stock.service'
 import { createTransaction, createAccountReceivable } from '../services/finance.service'
+import { writeAuditLog } from '../services/audit.service'
 
 function calcItems(items: Array<{ quantity: number; unitPrice: number }>, discountPct: number) {
   const subtotal = items.reduce((sum, i) => sum + i.quantity * i.unitPrice, 0)
@@ -190,7 +191,7 @@ export async function saleRoutes(app: FastifyInstance) {
   // PATCH /api/sales/:id/cancel
   app.patch('/:id/cancel', authenticate, async (request, reply) => {
     try {
-      const { companyId } = request.user as any
+      const { companyId, id: userId, name: userName } = request.user as any
       const { id } = request.params as any
 
       const sale = await prisma.sale.findFirst({
@@ -225,6 +226,8 @@ export async function saleRoutes(app: FastifyInstance) {
 
         await tx.sale.update({ where: { id }, data: { status: 'CANCELLED' } })
       })
+
+      await writeAuditLog({ companyId, entity: 'sale', entityId: id, action: 'cancelled', userId, userName, data: { number: sale.number, total: Number(sale.total) } })
 
       return reply.send({ data: { message: 'Venta cancelada' } })
     } catch (err) {

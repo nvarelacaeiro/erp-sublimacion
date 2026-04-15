@@ -8,13 +8,13 @@ const createUserSchema = z.object({
   name: z.string().min(1).max(100),
   email: z.string().email(),
   password: z.string().min(6, 'Mínimo 6 caracteres'),
-  role: z.enum(['ADMIN', 'SELLER']).default('SELLER'),
+  role: z.enum(['ADMIN', 'SELLER', 'APPROVER', 'REQUESTER']).default('SELLER'),
 })
 
 const updateUserSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   email: z.string().email().optional(),
-  role: z.enum(['ADMIN', 'SELLER']).optional(),
+  role: z.enum(['ADMIN', 'SELLER', 'APPROVER', 'REQUESTER']).optional(),
   password: z.string().min(6).optional(),
   active: z.boolean().optional(),
 })

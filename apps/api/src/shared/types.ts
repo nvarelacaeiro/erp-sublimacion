@@ -2,7 +2,9 @@
 // Tipos base del dominio
 // ============================================================
 
-export type UserRole = 'ADMIN' | 'SELLER'
+export type UserRole = 'ADMIN' | 'SELLER' | 'APPROVER' | 'REQUESTER'
+export type RequisitionStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'ORDERED' | 'CLOSED'
+export type RequisitionPriority = 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT'
 export type QuoteStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'EXPIRED'
 export type SaleStatus = 'COMPLETED' | 'PENDING' | 'CANCELLED'
 export type PurchaseStatus = 'PENDING' | 'RECEIVED' | 'CANCELLED'

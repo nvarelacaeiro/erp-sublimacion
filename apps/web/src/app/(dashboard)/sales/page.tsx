@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/shared/Badge'
 import { EmptyState } from '@/components/shared/EmptyState'
+import { ExportButton } from '@/components/shared/ExportButton'
+import { AuditLogPanel } from '@/components/shared/AuditLogPanel'
 
 export default function SalesPage() {
   const [from, setFrom] = useState('')
@@ -60,6 +62,20 @@ export default function SalesPage() {
           </button>
         )}
         <div className="flex-1" />
+        <ExportButton
+          filename="ventas"
+          sheetName="Ventas"
+          getData={() => sales.map(s => ({
+            Número: s.number,
+            Fecha: new Date(s.date).toLocaleDateString('es-AR'),
+            Cliente: s.clientName ?? '',
+            Estado: s.status,
+            'Método de pago': s.paymentMethod,
+            Subtotal: s.subtotal,
+            Descuento: s.discount,
+            Total: s.total,
+          }))}
+        />
         <Link href="/sales/new">
           <Button>Nueva venta</Button>
         </Link>
@@ -209,6 +225,14 @@ export default function SalesPage() {
                     </div>
                   ) : (
                     <p className="text-xs text-gray-400 dark:text-slate-500 text-center py-2">Sin ítems</p>
+                  )}
+
+                  {/* Historial — solo si hay logs */}
+                  {sale.status === 'CANCELLED' && (
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
+                      <p className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-2">Historial</p>
+                      <AuditLogPanel entity="sale" entityId={sale.id} />
+                    </div>
                   )}
                 </div>
               )}

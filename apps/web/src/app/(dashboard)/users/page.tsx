@@ -15,7 +15,7 @@ interface UserData {
   id: string
   name: string
   email: string
-  role: 'ADMIN' | 'SELLER'
+  role: 'ADMIN' | 'SELLER' | 'APPROVER' | 'REQUESTER'
   active: boolean
   createdAt: string
 }
@@ -23,7 +23,23 @@ interface UserData {
 const ROLE_OPTIONS = [
   { value: 'SELLER', label: 'Operador' },
   { value: 'ADMIN', label: 'Administrador' },
+  { value: 'APPROVER', label: 'Aprobador' },
+  { value: 'REQUESTER', label: 'Solicitante' },
 ]
+
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: 'Admin',
+  SELLER: 'Operador',
+  APPROVER: 'Aprobador',
+  REQUESTER: 'Solicitante',
+}
+
+const ROLE_COLORS: Record<string, string> = {
+  ADMIN: 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400',
+  SELLER: 'bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-300',
+  APPROVER: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  REQUESTER: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+}
 
 function UserForm({
   defaultValues,
@@ -41,7 +57,7 @@ function UserForm({
   const [name, setName] = useState(defaultValues?.name ?? '')
   const [email, setEmail] = useState(defaultValues?.email ?? '')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState<'ADMIN' | 'SELLER'>(defaultValues?.role ?? 'SELLER')
+  const [role, setRole] = useState<'ADMIN' | 'SELLER' | 'APPROVER' | 'REQUESTER'>(defaultValues?.role ?? 'SELLER')
   const [error, setError] = useState('')
 
   async function handleSubmit(e: React.FormEvent) {
@@ -95,7 +111,7 @@ function UserForm({
         <label className="text-sm font-medium text-gray-700 dark:text-slate-300 block mb-1">Rol</label>
         <select
           value={role}
-          onChange={e => setRole(e.target.value as 'ADMIN' | 'SELLER')}
+          onChange={e => setRole(e.target.value as 'ADMIN' | 'SELLER' | 'APPROVER' | 'REQUESTER')}
           className="w-full px-3 py-2.5 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
         >
           {ROLE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -195,8 +211,8 @@ export default function UsersPage() {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-gray-900 dark:text-slate-100 truncate">{u.name}</span>
                   <Badge
-                    label={u.role === 'ADMIN' ? 'Admin' : 'Operador'}
-                    className={u.role === 'ADMIN' ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400' : 'bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-300'}
+                    label={ROLE_LABELS[u.role] ?? u.role}
+                    className={ROLE_COLORS[u.role] ?? 'bg-gray-100 text-gray-600 dark:bg-slate-700 dark:text-slate-300'}
                   />
                   {!u.active && (
                     <Badge label="Inactivo" className="bg-red-100 text-red-600" />

@@ -47,6 +47,7 @@ export async function dashboardRoutes(app: FastifyInstance) {
         lowStockProducts,
         recentSales,
         chartData,
+        requisitionStats,
       ] = await Promise.all([
         prisma.sale.aggregate({
           where: { companyId, status: { not: 'CANCELLED' }, date: { gte: start, lte: end } },
@@ -109,10 +110,20 @@ export async function dashboardRoutes(app: FastifyInstance) {
               GROUP BY TO_CHAR(date, 'YYYY-MM')
               ORDER BY period ASC
             `,
+
+        prisma.requisition.groupBy({
+          by: ['status'],
+          where: { companyId },
+          _count: { id: true },
+        }),
       ])
 
       const income = Number(incomeAgg._sum.amount ?? 0)
       const expense = Number(expenseAgg._sum.amount ?? 0)
+
+      const reqByStatus = Object.fromEntries(
+        requisitionStats.map(r => [r.status, r._count.id]),
+      )
 
       return reply.send({
         data: {
@@ -148,6 +159,12 @@ export async function dashboardRoutes(app: FastifyInstance) {
             income: Number(row.income),
             expense: Number(row.expense),
           })),
+          requisitions: {
+            draft: reqByStatus['DRAFT'] ?? 0,
+            pending: reqByStatus['PENDING'] ?? 0,
+            approved: reqByStatus['APPROVED'] ?? 0,
+            ordered: reqByStatus['ORDERED'] ?? 0,
+          },
         },
       })
     } catch (err) {

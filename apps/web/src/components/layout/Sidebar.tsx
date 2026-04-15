@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Package, Users, Truck, ShoppingCart,
-  DollarSign, FileText, CreditCard, ChevronLeft, ChevronRight, LogOut, Tag, UserRound,
+  DollarSign, FileText, CreditCard, ChevronLeft, ChevronRight, LogOut, Tag, UserRound, ClipboardList, PackageCheck,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/auth.store'
@@ -18,8 +18,10 @@ const NAV_ITEMS = [
   { href: '/categories', icon: Tag, label: 'Categorías' },
   { href: '/clients', icon: Users, label: 'Clientes' },
   { href: '/suppliers', icon: Truck, label: 'Proveedores' },
+  { href: '/requisitions', icon: ClipboardList, label: 'Solicitudes' },
   { href: '/purchases', icon: ShoppingCart, label: 'Compras' },
   { href: '/sales', icon: DollarSign, label: 'Ventas' },
+  { href: '/delivery-notes', icon: PackageCheck, label: 'Remitos' },
   { href: '/quotes', icon: FileText, label: 'Presupuestos' },
   { href: '/finance', icon: CreditCard, label: 'Finanzas' },
   { href: '/users', icon: UserRound, label: 'Usuarios' },
