@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { prisma } from '../lib/prisma'
 import { handleError, NotFoundError, AppError } from '../lib/errors'
 import { writeAuditLog } from '../services/audit.service'
+import { sendRequisitionSubmittedEmail } from '../services/email.service'
 
 const itemSchema = z.object({
   productId: z.string().optional().nullable(),
@@ -252,6 +253,22 @@ export async function requisitionRoutes(app: FastifyInstance) {
         include: { requestedBy: { select: { id: true, name: true } } },
       })
       await writeAuditLog({ companyId, entity: 'requisition', entityId: id, action: 'submitted', userId, userName: r.requestedBy.name, data: { number: existing.number, title: existing.title } })
+
+      // Notificar por email a ADMINs y APPROVERs de la empresa (fire-and-forget)
+      prisma.user.findMany({
+        where: { companyId, role: { in: ['ADMIN', 'APPROVER'] } },
+        select: { email: true },
+      }).then(approvers => {
+        const emails = approvers.map(u => u.email).filter(Boolean)
+        return sendRequisitionSubmittedEmail({
+          to: emails,
+          requisitionNumber: existing.number,
+          requisitionTitle: existing.title,
+          requesterName: r.requestedBy.name,
+          appUrl: process.env.APP_URL ?? 'https://erp-sublimacion.vercel.app',
+        })
+      }).catch(() => { /* nunca rompe el flujo principal */ })
+
       return reply.send({ data: r })
     } catch (err) {
       return handleError(reply, err)
