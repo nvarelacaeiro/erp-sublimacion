@@ -29,7 +29,7 @@ export function TopBar() {
   const { title, action } = config?.[1] ?? { title: '' }
 
   return (
-    <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-6 bg-[#EAE4D8] dark:bg-slate-900 border-b border-[#d4cfc6] dark:border-slate-700 sticky top-0 z-30">
+    <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-6 bg-[#E8EEF5] dark:bg-slate-900 border-b border-[#c8d5e8] dark:border-slate-700 sticky top-0 z-30">
       <div className="flex items-center">
         <SiTiendaLogo className="md:hidden" />
         <h1 className="hidden md:block text-lg font-semibold text-gray-900 dark:text-slate-100">{title}</h1>

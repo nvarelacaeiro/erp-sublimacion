@@ -26,7 +26,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center bg-[#EAE4D8] dark:bg-slate-900 px-4">
+    <div className="min-h-dvh flex flex-col items-center justify-center bg-[#E8EEF5] dark:bg-slate-900 px-4">
       <div className="w-full max-w-sm">
         <div className="flex items-center justify-center mb-8">
           <SiTiendaLogo className="h-10 w-auto" />
