@@ -1,13 +1,16 @@
 'use client'
 import { useState } from 'react'
 import { usePurchases, useCreatePurchase, useMarkPurchasePaid } from '@/hooks/usePurchases'
+import { useRequisitions } from '@/hooks/useRequisitions'
+import { useAuthStore } from '@/store/auth.store'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import { ShoppingCart, Plus, Search, CheckCircle, Clock, ChevronDown, ChevronUp } from 'lucide-react'
+import { ShoppingCart, Plus, Search, CheckCircle, Clock, ChevronDown, ChevronUp, ClipboardList, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { PurchaseForm } from '@/components/shared/PurchaseForm'
 import { ExportButton } from '@/components/shared/ExportButton'
+import Link from 'next/link'
 
 export default function PurchasesPage() {
   const [showForm, setShowForm] = useState(false)
@@ -15,6 +18,14 @@ export default function PurchasesPage() {
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
+
+  const { user } = useAuthStore()
+  const role = user?.role ?? ''
+  const canApprove = role === 'ADMIN' || role === 'APPROVER'
+  const { data: requisitions = [] } = useRequisitions()
+  const approvedRequisitions = canApprove
+    ? requisitions.filter(r => r.status === 'APPROVED' && !r.purchase)
+    : []
 
   const { data: purchases = [], isLoading } = usePurchases({
     from: fromDate || undefined,
@@ -42,6 +53,30 @@ export default function PurchasesPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
+
+      {/* Alerta: solicitudes aprobadas esperando orden de compra */}
+      {approvedRequisitions.length > 0 && (
+        <Link
+          href="/requisitions"
+          className="flex items-center justify-between gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl px-4 py-3 mb-4 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors group"
+        >
+          <div className="flex items-center gap-3">
+            <ClipboardList size={18} className="text-amber-600 dark:text-amber-400 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+                {approvedRequisitions.length === 1
+                  ? '1 solicitud aprobada esperando orden de compra'
+                  : `${approvedRequisitions.length} solicitudes aprobadas esperando orden de compra`}
+              </p>
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
+                {approvedRequisitions.map(r => `#${r.number} ${r.title}`).join(' · ')}
+              </p>
+            </div>
+          </div>
+          <ArrowRight size={16} className="text-amber-500 dark:text-amber-400 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+        </Link>
+      )}
+
       {/* Filtros */}
       <div className="flex flex-wrap gap-2 mb-4">
         <div className="relative flex-1 min-w-[160px]">

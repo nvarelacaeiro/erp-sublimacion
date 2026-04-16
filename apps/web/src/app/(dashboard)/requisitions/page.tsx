@@ -552,15 +552,7 @@ function RequisitionCard({ req, role, userId, onEdit, onConvert }: RequisitionCa
                 </button>
               </>
             )}
-            {canConvert && (
-              <button
-                onClick={() => onConvert(req)}
-                title="Convertir a compra"
-                className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
-              >
-                <ShoppingCart size={15} />
-              </button>
-            )}
+            {/* canConvert se muestra como banner abajo, no como ícono */}
             {canEdit && (
               <button
                 onClick={() => onEdit(req)}
@@ -591,6 +583,23 @@ function RequisitionCard({ req, role, userId, onEdit, onConvert }: RequisitionCa
 
         {actionError && (
           <div className="px-4 pb-2 text-xs text-red-600 dark:text-red-400">{actionError}</div>
+        )}
+
+        {/* Banner: convertir a compra */}
+        {canConvert && (
+          <div className="mx-3 mb-3 flex items-center justify-between gap-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg px-4 py-2.5">
+            <div className="flex items-center gap-2 text-sm text-green-800 dark:text-green-300">
+              <CheckCircle2 size={15} className="shrink-0" />
+              <span>Solicitud aprobada — lista para generar orden de compra</span>
+            </div>
+            <button
+              onClick={() => onConvert(req)}
+              className="shrink-0 flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+            >
+              <ShoppingCart size={13} />
+              Generar compra
+            </button>
+          </div>
         )}
 
         {/* Expanded items */}
