@@ -18,6 +18,7 @@ const createSchema = z.object({
   priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT']).default('NORMAL'),
   neededBy: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
+  projectId: z.string().optional().nullable(),
   items: z.array(itemSchema).min(1),
 })
 
@@ -26,6 +27,7 @@ const updateSchema = z.object({
   priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'URGENT']).optional(),
   neededBy: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
+  projectId: z.string().optional().nullable(),
   items: z.array(itemSchema).min(1).optional(),
 })
 
@@ -54,6 +56,8 @@ export async function requisitionRoutes(app: FastifyInstance) {
         include: {
           requestedBy: { select: { id: true, name: true } },
           approvedBy: { select: { id: true, name: true } },
+          project: { select: { id: true, name: true } },
+          purchase: { select: { id: true, number: true } },
           items: {
             include: { product: { select: { id: true, name: true, sku: true } } },
           },
@@ -87,10 +91,11 @@ export async function requisitionRoutes(app: FastifyInstance) {
         include: {
           requestedBy: { select: { id: true, name: true } },
           approvedBy: { select: { id: true, name: true } },
+          project: { select: { id: true, name: true } },
+          purchase: { select: { id: true, number: true } },
           items: {
             include: { product: { select: { id: true, name: true, sku: true } } },
           },
-          purchase: { select: { id: true, number: true } },
         },
       })
       if (!r) throw new NotFoundError('Solicitud')
@@ -127,6 +132,7 @@ export async function requisitionRoutes(app: FastifyInstance) {
           priority: body.priority,
           neededBy: body.neededBy ? new Date(body.neededBy) : null,
           notes: body.notes,
+          projectId: body.projectId ?? null,
           status: 'DRAFT',
           items: {
             create: body.items.map(item => ({
@@ -159,7 +165,7 @@ export async function requisitionRoutes(app: FastifyInstance) {
     }
   })
 
-  // ── UPDATE (only DRAFT) ──────────────────────────────────────
+  // ── UPDATE (DRAFT por solicitante; PENDING por aprobador) ───
   app.put('/:id', authenticate, async (request, reply) => {
     try {
       const { companyId, id: userId, role } = request.user as any
@@ -168,9 +174,17 @@ export async function requisitionRoutes(app: FastifyInstance) {
 
       const existing = await prisma.requisition.findFirst({ where: { id, companyId } })
       if (!existing) throw new NotFoundError('Solicitud')
-      if (existing.status !== 'DRAFT') throw new AppError('Solo se pueden editar solicitudes en borrador', 400)
-      if (role === 'REQUESTER' && existing.requestedById !== userId) {
-        throw new AppError('No tenés permiso para editar esta solicitud', 403)
+
+      const isApprover = role === 'ADMIN' || role === 'APPROVER'
+
+      if (existing.status === 'DRAFT') {
+        if (role === 'REQUESTER' && existing.requestedById !== userId) {
+          throw new AppError('No tenés permiso para editar esta solicitud', 403)
+        }
+      } else if (existing.status === 'PENDING') {
+        if (!isApprover) throw new AppError('Solo el aprobador puede editar solicitudes pendientes', 403)
+      } else {
+        throw new AppError('No se puede editar una solicitud en este estado', 400)
       }
 
       const requisition = await prisma.requisition.update({
@@ -178,8 +192,9 @@ export async function requisitionRoutes(app: FastifyInstance) {
         data: {
           title: body.title,
           priority: body.priority,
-          neededBy: body.neededBy ? new Date(body.neededBy) : null,
+          neededBy: body.neededBy !== undefined ? (body.neededBy ? new Date(body.neededBy) : null) : undefined,
           notes: body.notes,
+          projectId: body.projectId !== undefined ? (body.projectId ?? null) : undefined,
           ...(body.items && {
             items: {
               deleteMany: {},
@@ -195,9 +210,23 @@ export async function requisitionRoutes(app: FastifyInstance) {
         },
         include: {
           requestedBy: { select: { id: true, name: true } },
+          project: { select: { id: true, name: true } },
           items: { include: { product: { select: { id: true, name: true, sku: true } } } },
         },
       })
+
+      // Audit log cuando aprobador edita en PENDING
+      if (existing.status === 'PENDING' && isApprover) {
+        await writeAuditLog({
+          companyId,
+          entity: 'requisition',
+          entityId: id,
+          action: 'edited_by_approver',
+          userId,
+          userName: requisition.requestedBy.name,
+          data: { title: body.title, notes: body.notes },
+        })
+      }
 
       return reply.send({
         data: {

@@ -166,7 +166,7 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
           {...register('name')}
         />
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input label="SKU" placeholder="Ej: CAM-001" {...register('sku')} />
           <div className="flex flex-col gap-1">
             <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Categoría</label>
@@ -182,7 +182,7 @@ export function ProductForm({ defaultValues, onSave, onCancel, loading }: Produc
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <Input
             label="Costo base ($) *"
             type="number"

@@ -25,6 +25,8 @@ export interface Requisition {
   neededBy: string | null
   rejectionReason: string | null
   notes: string | null
+  projectId: string | null
+  project: { id: string; name: string } | null
   requestedBy: { id: string; name: string }
   approvedBy: { id: string; name: string } | null
   purchase?: { id: string; number: number } | null
@@ -38,6 +40,7 @@ export interface CreateRequisitionInput {
   priority: RequisitionPriority
   neededBy?: string | null
   notes?: string | null
+  projectId?: string | null
   items: {
     productId?: string | null
     description: string

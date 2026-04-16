@@ -14,12 +14,13 @@ import {
   type CreateRequisitionInput,
   type RequisitionPriority,
 } from '@/hooks/useRequisitions'
+import { useProjects, useCreateProject } from '@/hooks/useProjects'
 import { useCreatePurchase } from '@/hooks/usePurchases'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import {
   ClipboardList, Plus, ChevronDown, ChevronUp, Trash2, Send,
-  CheckCircle2, XCircle, ShoppingCart, Pencil, X, Check,
+  CheckCircle2, XCircle, ShoppingCart, Pencil, X, Check, Building2,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -106,6 +107,14 @@ function RequisitionForm({ initial, onClose }: RequisitionFormProps) {
     queryFn: () => api.get<{ id: string; name: string; sku: string | null; unit: string }[]>('/api/products'),
   })
 
+  const { data: projects = [] } = useProjects()
+  const createProject = useCreateProject()
+
+  // obra state
+  const [projectId, setProjectId] = useState(initial?.projectId ?? '')
+  const [newProjectName, setNewProjectName] = useState('')
+  const isCreatingNewProject = projectId === '__new__'
+
   const [title, setTitle] = useState(initial?.title ?? '')
   const [priority, setPriority] = useState<RequisitionPriority>(initial?.priority ?? 'NORMAL')
   const [neededBy, setNeededBy] = useState(initial?.neededBy ? initial.neededBy.slice(0, 10) : '')
@@ -123,7 +132,7 @@ function RequisitionForm({ initial, onClose }: RequisitionFormProps) {
 
   const create = useCreateRequisition()
   const update = useUpdateRequisition()
-  const loading = create.isPending || update.isPending
+  const loading = create.isPending || update.isPending || createProject.isPending
 
   function addItem() {
     setItems(prev => [...prev, emptyItem()])
@@ -158,11 +167,26 @@ function RequisitionForm({ initial, onClose }: RequisitionFormProps) {
     if (invalidItem) { setError('Cada ítem debe tener descripción y cantidad válida'); return }
 
     setError('')
+
+    // Si está creando obra nueva, crearla primero
+    let finalProjectId: string | null = projectId || null
+    if (isCreatingNewProject) {
+      if (!newProjectName.trim()) { setError('Ingresá el nombre de la obra'); return }
+      try {
+        const proj = await createProject.mutateAsync({ name: newProjectName.trim() })
+        finalProjectId = proj.id
+      } catch (err: any) {
+        setError(err.message ?? 'Error al crear la obra')
+        return
+      }
+    }
+
     const payload: CreateRequisitionInput = {
       title: title.trim(),
       priority,
       neededBy: neededBy || null,
       notes: notes.trim() || null,
+      projectId: finalProjectId,
       items: items.map(i => ({
         productId: i.productId || null,
         description: i.description.trim(),
@@ -186,8 +210,36 @@ function RequisitionForm({ initial, onClose }: RequisitionFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+
+      {/* Obra */}
+      <div>
+        <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
+          <Building2 size={12} className="inline mr-1" />Obra
+        </label>
+        <select
+          value={projectId}
+          onChange={e => { setProjectId(e.target.value); setNewProjectName('') }}
+          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
+        >
+          <option value="">Sin obra asignada</option>
+          {projects.map(p => (
+            <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+          <option value="__new__">+ Nueva obra...</option>
+        </select>
+        {isCreatingNewProject && (
+          <input
+            value={newProjectName}
+            onChange={e => setNewProjectName(e.target.value)}
+            placeholder="Nombre de la nueva obra *"
+            autoFocus
+            className="mt-2 w-full px-3 py-2 text-sm border border-primary-400 dark:border-primary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
+          />
+        )}
+      </div>
+
       {/* Title + Priority */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="flex-1">
           <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Título *</label>
           <input
@@ -197,7 +249,7 @@ function RequisitionForm({ initial, onClose }: RequisitionFormProps) {
             className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
           />
         </div>
-        <div className="w-32">
+        <div className="sm:w-32">
           <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Prioridad</label>
           <select
             value={priority}
@@ -213,8 +265,8 @@ function RequisitionForm({ initial, onClose }: RequisitionFormProps) {
       </div>
 
       {/* Needed by + Notes */}
-      <div className="flex gap-3">
-        <div className="w-44">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="sm:w-44">
           <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Necesaria para</label>
           <input
             type="date"
@@ -249,68 +301,73 @@ function RequisitionForm({ initial, onClose }: RequisitionFormProps) {
 
         <div className="space-y-2">
           {items.map((item, i) => (
-            <div key={i} className="flex gap-2 items-start bg-gray-50 dark:bg-slate-800/50 rounded-lg p-2">
-              {/* Product selector */}
-              <div className="w-40 shrink-0">
-                <select
-                  value={item.productId}
-                  onChange={e => handleProductSelect(i, e.target.value)}
-                  className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
+            <div key={i} className="bg-gray-50 dark:bg-slate-800/50 rounded-lg p-3 space-y-2">
+              {/* Row 1: Producto + Descripción */}
+              <div className="flex gap-2">
+                <div className="w-36 sm:w-44 shrink-0">
+                  <select
+                    value={item.productId}
+                    onChange={e => handleProductSelect(i, e.target.value)}
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
+                  >
+                    <option value="">Producto</option>
+                    {products.data?.map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <input
+                    value={item.description}
+                    onChange={e => setItemField(i, 'description', e.target.value)}
+                    placeholder="Descripción *"
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+              </div>
+              {/* Row 2: Qty + Unit + Costo + Remove */}
+              <div className="flex gap-2 items-center">
+                <div className="flex-1">
+                  <label className="text-[10px] text-gray-400 dark:text-slate-500 block mb-0.5">Cantidad</label>
+                  <input
+                    type="number"
+                    min="0.001"
+                    step="any"
+                    value={item.quantity}
+                    onChange={e => setItemField(i, 'quantity', Number(e.target.value))}
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div className="w-16 sm:w-20">
+                  <label className="text-[10px] text-gray-400 dark:text-slate-500 block mb-0.5">Unidad</label>
+                  <input
+                    value={item.unit}
+                    onChange={e => setItemField(i, 'unit', e.target.value)}
+                    placeholder="un"
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-[10px] text-gray-400 dark:text-slate-500 block mb-0.5">Costo est.</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="any"
+                    value={item.estimatedCost}
+                    onChange={e => setItemField(i, 'estimatedCost', e.target.value)}
+                    placeholder="$0"
+                    className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeItem(i)}
+                  disabled={items.length === 1}
+                  className="mt-4 p-1.5 text-gray-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
                 >
-                  <option value="">Producto (opcional)</option>
-                  {products.data?.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
+                  <X size={14} />
+                </button>
               </div>
-
-              {/* Description */}
-              <div className="flex-1">
-                <input
-                  value={item.description}
-                  onChange={e => setItemField(i, 'description', e.target.value)}
-                  placeholder="Descripción *"
-                  className="w-full px-2 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
-                />
-              </div>
-
-              {/* Qty */}
-              <input
-                type="number"
-                min="0.001"
-                step="any"
-                value={item.quantity}
-                onChange={e => setItemField(i, 'quantity', Number(e.target.value))}
-                className="w-16 px-2 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
-              />
-
-              {/* Unit */}
-              <input
-                value={item.unit}
-                onChange={e => setItemField(i, 'unit', e.target.value)}
-                placeholder="un"
-                className="w-14 px-2 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
-              />
-
-              {/* Estimated cost */}
-              <input
-                type="number"
-                min="0"
-                step="any"
-                value={item.estimatedCost}
-                onChange={e => setItemField(i, 'estimatedCost', e.target.value)}
-                placeholder="Costo est."
-                className="w-24 px-2 py-1.5 text-xs border border-gray-300 dark:border-slate-600 rounded focus:outline-none focus:ring-1 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
-              />
-
-              <button
-                type="button"
-                onClick={() => removeItem(i)}
-                disabled={items.length === 1}
-                className="p-1.5 text-gray-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                <X size={14} />
-              </button>
             </div>
           ))}
         </div>
@@ -390,7 +447,9 @@ function RequisitionCard({ req, role, userId, onEdit, onConvert }: RequisitionCa
 
   const isOwner = req.requestedBy.id === userId
   const canApprove = role === 'ADMIN' || role === 'APPROVER'
-  const canEdit = req.status === 'DRAFT' && (role === 'ADMIN' || isOwner)
+  // Solicitante edita en DRAFT; aprobador puede editar también en PENDING
+  const canEdit = (req.status === 'DRAFT' && (role === 'ADMIN' || isOwner)) ||
+                  (req.status === 'PENDING' && canApprove)
   const canDelete = req.status === 'DRAFT' && (role === 'ADMIN' || isOwner)
   const canSubmit = req.status === 'DRAFT' && (role === 'ADMIN' || isOwner)
   const canConvert = req.status === 'APPROVED' && canApprove && !req.purchase
@@ -427,6 +486,12 @@ function RequisitionCard({ req, role, userId, onEdit, onConvert }: RequisitionCa
               <PriorityDot priority={req.priority} />
             </div>
             <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-500 dark:text-slate-400 flex-wrap">
+              {req.project && (
+                <span className="flex items-center gap-1">
+                  <Building2 size={11} />
+                  {req.project.name}
+                </span>
+              )}
               <span>Por {req.requestedBy.name}</span>
               {req.approvedBy && <span>· Aprobado por {req.approvedBy.name}</span>}
               {req.neededBy && (
@@ -457,7 +522,7 @@ function RequisitionCard({ req, role, userId, onEdit, onConvert }: RequisitionCa
             )}
             {req.status === 'PENDING' && (
               <a
-                href={`https://wa.me/5493513052919?text=${encodeURIComponent(`Hola, hay una solicitud de compra pendiente de aprobación en el sistema:\n\n📋 #${req.number} - ${req.title}\nSolicitado por: ${req.requestedBy.name}\n\nPor favor ingresá al sistema para aprobarla o rechazarla.`)}`}
+                href={`https://wa.me/5493513052919?text=${encodeURIComponent(`Hola, hay una solicitud de compra pendiente de aprobación en el sistema:\n\n📋 #${req.number} - ${req.title}${req.project ? `\n🏗️ Obra: ${req.project.name}` : ''}\nSolicitado por: ${req.requestedBy.name}\n\nPor favor ingresá al sistema para aprobarla o rechazarla.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Avisar por WhatsApp"
@@ -499,7 +564,7 @@ function RequisitionCard({ req, role, userId, onEdit, onConvert }: RequisitionCa
             {canEdit && (
               <button
                 onClick={() => onEdit(req)}
-                title="Editar"
+                title={req.status === 'PENDING' ? 'Editar (aprobador)' : 'Editar'}
                 className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700"
               >
                 <Pencil size={15} />
@@ -534,51 +599,69 @@ function RequisitionCard({ req, role, userId, onEdit, onConvert }: RequisitionCa
             {req.notes && (
               <p className="text-xs text-gray-500 dark:text-slate-400 mb-2 italic">{req.notes}</p>
             )}
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="text-gray-500 dark:text-slate-400">
-                  <th className="text-left pb-1 font-medium">Descripción</th>
-                  <th className="text-right pb-1 font-medium w-16">Cant.</th>
-                  <th className="text-right pb-1 font-medium w-16">Unidad</th>
-                  <th className="text-right pb-1 font-medium w-24">Costo est.</th>
-                  <th className="text-right pb-1 font-medium w-24">Total est.</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50 dark:divide-slate-700/50">
-                {req.items.map(item => (
-                  <tr key={item.id}>
-                    <td className="py-1 text-gray-700 dark:text-slate-300">
-                      {item.description}
-                      {item.product && (
-                        <span className="ml-1 text-gray-400 dark:text-slate-500">({item.product.sku ?? item.product.name})</span>
-                      )}
-                    </td>
-                    <td className="py-1 text-right text-gray-700 dark:text-slate-300">{item.quantity}</td>
-                    <td className="py-1 text-right text-gray-500 dark:text-slate-400">{item.unit}</td>
-                    <td className="py-1 text-right text-gray-700 dark:text-slate-300">
-                      {item.estimatedCost != null
-                        ? `$${item.estimatedCost.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
-                        : '—'}
-                    </td>
-                    <td className="py-1 text-right text-gray-700 dark:text-slate-300">
-                      {item.estimatedCost != null
-                        ? `$${(item.quantity * item.estimatedCost).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
-                        : '—'}
-                    </td>
+            {/* Items: tabla en desktop, cards en mobile */}
+            <div className="hidden sm:block">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-gray-500 dark:text-slate-400">
+                    <th className="text-left pb-1 font-medium">Descripción</th>
+                    <th className="text-right pb-1 font-medium w-16">Cant.</th>
+                    <th className="text-right pb-1 font-medium w-16">Unidad</th>
+                    <th className="text-right pb-1 font-medium w-24">Costo est.</th>
+                    <th className="text-right pb-1 font-medium w-24">Total est.</th>
                   </tr>
-                ))}
-              </tbody>
+                </thead>
+                <tbody className="divide-y divide-gray-50 dark:divide-slate-700/50">
+                  {req.items.map(item => (
+                    <tr key={item.id}>
+                      <td className="py-1 text-gray-700 dark:text-slate-300">
+                        {item.description}
+                        {item.product && (
+                          <span className="ml-1 text-gray-400 dark:text-slate-500">({item.product.sku ?? item.product.name})</span>
+                        )}
+                      </td>
+                      <td className="py-1 text-right text-gray-700 dark:text-slate-300">{item.quantity}</td>
+                      <td className="py-1 text-right text-gray-500 dark:text-slate-400">{item.unit}</td>
+                      <td className="py-1 text-right text-gray-700 dark:text-slate-300">
+                        {item.estimatedCost != null ? `$${item.estimatedCost.toLocaleString('es-AR', { minimumFractionDigits: 2 })}` : '—'}
+                      </td>
+                      <td className="py-1 text-right text-gray-700 dark:text-slate-300">
+                        {item.estimatedCost != null ? `$${(item.quantity * item.estimatedCost).toLocaleString('es-AR', { minimumFractionDigits: 2 })}` : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                {totalEstimated > 0 && (
+                  <tfoot>
+                    <tr className="border-t border-gray-200 dark:border-slate-600">
+                      <td colSpan={4} className="pt-1.5 text-right font-semibold text-gray-700 dark:text-slate-300">Total estimado</td>
+                      <td className="pt-1.5 text-right font-semibold text-gray-900 dark:text-slate-100">
+                        ${totalEstimated.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                      </td>
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
+            </div>
+            {/* Mobile: cards por ítem */}
+            <div className="sm:hidden space-y-2">
+              {req.items.map(item => (
+                <div key={item.id} className="bg-gray-50 dark:bg-slate-700/50 rounded-lg px-3 py-2 text-xs">
+                  <div className="font-medium text-gray-800 dark:text-slate-200 mb-1">{item.description}</div>
+                  <div className="flex gap-4 text-gray-500 dark:text-slate-400">
+                    <span>{item.quantity} {item.unit}</span>
+                    {item.estimatedCost != null && (
+                      <span>Total: ${(item.quantity * item.estimatedCost).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
+                    )}
+                  </div>
+                </div>
+              ))}
               {totalEstimated > 0 && (
-                <tfoot>
-                  <tr className="border-t border-gray-200 dark:border-slate-600">
-                    <td colSpan={4} className="pt-1.5 text-right font-semibold text-gray-700 dark:text-slate-300">Total estimado</td>
-                    <td className="pt-1.5 text-right font-semibold text-gray-900 dark:text-slate-100">
-                      ${totalEstimated.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                    </td>
-                  </tr>
-                </tfoot>
+                <div className="text-right text-xs font-semibold text-gray-800 dark:text-slate-200 pt-1">
+                  Total estimado: ${totalEstimated.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                </div>
               )}
-            </table>
+            </div>
 
             {/* Historial */}
             <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-700">
@@ -679,7 +762,7 @@ export default function RequisitionsPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-start justify-between mb-4 gap-3">
         <div>
           <h1 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Solicitudes de compra</h1>
           {canApprove && pendingCount > 0 && (
@@ -688,31 +771,40 @@ export default function RequisitionsPage() {
             </p>
           )}
         </div>
-        <ExportButton
-          filename="solicitudes"
-          sheetName="Solicitudes"
-          getData={() => filtered.map(r => ({
-            Número: r.number,
-            Título: r.title,
-            Estado: STATUS_LABELS[r.status] ?? r.status,
-            Prioridad: PRIORITY_LABELS[r.priority] ?? r.priority,
-            Solicitado_por: r.requestedBy.name,
-            Aprobado_por: r.approvedBy?.name ?? '',
-            Necesaria_para: r.neededBy ? new Date(r.neededBy).toLocaleDateString('es-AR') : '',
-            Notas: r.notes ?? '',
-            Creada: new Date(r.createdAt).toLocaleDateString('es-AR'),
-          }))}
-        />
-        <Button onClick={() => { setEditTarget(null); setShowForm(true) }}>
-          <Plus size={16} /> Nueva solicitud
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <ExportButton
+            filename="solicitudes"
+            sheetName="Solicitudes"
+            getData={() => filtered.map(r => ({
+              Número: r.number,
+              Obra: r.project?.name ?? '',
+              Título: r.title,
+              Estado: STATUS_LABELS[r.status] ?? r.status,
+              Prioridad: PRIORITY_LABELS[r.priority] ?? r.priority,
+              Solicitado_por: r.requestedBy.name,
+              Aprobado_por: r.approvedBy?.name ?? '',
+              Necesaria_para: r.neededBy ? new Date(r.neededBy).toLocaleDateString('es-AR') : '',
+              Notas: r.notes ?? '',
+              Creada: new Date(r.createdAt).toLocaleDateString('es-AR'),
+            }))}
+          />
+          <Button onClick={() => { setEditTarget(null); setShowForm(true) }}>
+            <Plus size={16} />
+            <span className="hidden sm:inline">Nueva solicitud</span>
+            <span className="sm:hidden">Nueva</span>
+          </Button>
+        </div>
       </div>
 
       {/* Inline form */}
       {showForm && (
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 mb-4">
           <h2 className="text-sm font-semibold text-gray-900 dark:text-slate-100 mb-4">
-            {editTarget ? 'Editar solicitud' : 'Nueva solicitud'}
+            {editTarget
+              ? editTarget.status === 'PENDING'
+                ? `Editar solicitud #${editTarget.number} (revisión de aprobador)`
+                : 'Editar solicitud'
+              : 'Nueva solicitud'}
           </h2>
           <RequisitionForm initial={editTarget} onClose={handleCloseForm} />
         </div>

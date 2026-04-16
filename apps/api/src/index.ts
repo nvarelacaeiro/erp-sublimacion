@@ -19,6 +19,7 @@ import { productItemRoutes } from './routes/product-items'
 import { requisitionRoutes } from './routes/requisitions'
 import { deliveryNoteRoutes } from './routes/delivery-notes'
 import { auditRoutes } from './routes/audit'
+import { projectRoutes } from './routes/projects'
 import { runStockAlertCheck } from './services/stock-alert.service'
 
 const app = Fastify({ logger: process.env.NODE_ENV !== 'production' })
@@ -61,6 +62,7 @@ app.register(productItemRoutes, { prefix: '/api/products' })
 app.register(requisitionRoutes, { prefix: '/api/requisitions' })
 app.register(deliveryNoteRoutes, { prefix: '/api/delivery-notes' })
 app.register(auditRoutes, { prefix: '/api/audit' })
+app.register(projectRoutes, { prefix: '/api/projects' })
 
 // ── Health check ─────────────────────────────────────────────
 app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))
