@@ -24,8 +24,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Header */}
       <header className="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-3">
-          <svg width="12" height="16" viewBox="0 0 14 18" fill="none" aria-hidden="true">
-            <path d="M 7 0.5 L 13.5 9 L 7 17.5 L 0.5 9 Z" fill="#4f46e5"/>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="0" y="0" width="7" height="7" rx="1.5" fill="#4f46e5"/>
+            <rect x="9" y="0" width="7" height="7" rx="1.5" fill="#4f46e5" opacity="0.4"/>
+            <rect x="0" y="9" width="7" height="7" rx="1.5" fill="#4f46e5" opacity="0.4"/>
+            <rect x="9" y="9" width="7" height="7" rx="1.5" fill="#4f46e5"/>
           </svg>
           <span className="text-sm font-semibold text-slate-300">norde</span>
           <span className="text-slate-600">/</span>

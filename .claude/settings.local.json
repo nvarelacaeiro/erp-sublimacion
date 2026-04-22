@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm add:*)",
+      "Bash(pnpm --filter @erp/web tsc --noEmit)",
+      "Bash(npx tsc:*)",
+      "Bash(pnpm build:*)",
+      "Bash(grep -l \"bg-white\\\\|bg-gray-50\\\\|bg-gray-100\" /c/Users/Nico/erp-sublimacion/apps/web/src/app/\\\\\\(dashboard\\\\\\)/**/*.tsx)",
+      "Bash(xargs grep:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git push:*)",
+      "Bash(git commit -m 'fix: pass empty body on PATCH cancel to avoid Fastify content-type error:*)",
+      "Bash(git commit -m 'fix: allow clicking Agregar button regardless of input state:*)",
+      "Bash(npx prisma:*)",
+      "Bash(PRISMA_MIGRATE_SKIP_GENERATE=false npx prisma migrate dev --name add-requisitions --skip-generate)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(npm run:*)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(npm install:*)",
+      "Bash(grep -r \"NEXT_PUBLIC_API_URL\\\\|railway\" apps/web/.env*)",
+      "Bash(pnpm dev *)",
+      "Bash(powershell.exe -Command \"cd C:\\\\Users\\\\Nico\\\\erp-sublimacion\\\\apps\\\\api; pnpm dev\")",
+      "Bash(powershell.exe -Command \"Start-Sleep 5; Get-Content 'C:\\\\Users\\\\Nico\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-Nico-erp-sublimacion\\\\6e1e4765-01f3-44e2-a22e-dd024f96aee4\\\\tasks\\\\blhh9jw66.output' -Tail 20\")"
+    ]
+  }
+}

@@ -30,8 +30,11 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          <svg width="14" height="18" viewBox="0 0 14 18" fill="none">
-            <path d="M 7 0.5 L 13.5 9 L 7 17.5 L 0.5 9 Z" fill="#4f46e5"/>
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+            <rect x="0" y="0" width="7" height="7" rx="1.5" fill="#4f46e5"/>
+            <rect x="9" y="0" width="7" height="7" rx="1.5" fill="#4f46e5" opacity="0.4"/>
+            <rect x="0" y="9" width="7" height="7" rx="1.5" fill="#4f46e5" opacity="0.4"/>
+            <rect x="9" y="9" width="7" height="7" rx="1.5" fill="#4f46e5"/>
           </svg>
           <span className="text-xl font-bold text-slate-100 tracking-tight">norde</span>
           <span className="text-xs font-medium text-slate-400 bg-slate-800 px-2 py-0.5 rounded ml-1">admin</span>

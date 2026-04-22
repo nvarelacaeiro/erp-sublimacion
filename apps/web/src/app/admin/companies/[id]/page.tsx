@@ -39,8 +39,8 @@ export default function CompanyDetailPage() {
   async function toggleActive() {
     setSaving(true)
     try {
-      const updated = await adminApi.updateCompany(id, { active: !company.active })
-      setCompany(updated.data)
+      await adminApi.updateCompany(id, { active: !company.active })
+      load()
     } finally {
       setSaving(false)
     }
@@ -60,8 +60,8 @@ export default function CompanyDetailPage() {
   async function changePlan(plan: string) {
     setSaving(true)
     try {
-      const updated = await adminApi.updateCompany(id, { plan: plan as any })
-      setCompany(updated.data)
+      await adminApi.updateCompany(id, { plan: plan as any })
+      load()
     } finally {
       setSaving(false)
     }

@@ -62,8 +62,11 @@ export function openQuotePrintWindow(quote: any) {
 <body>
   <div class="header">
     <div>
-      <svg width="110" height="28" viewBox="0 0 110 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Norde" class="company-logo">
-        <path d="M 7 1 L 13 14 L 7 27 L 1 14 Z" fill="#4f46e5"/>
+      <svg width="115" height="28" viewBox="0 0 115 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Norde" class="company-logo">
+        <rect x="0" y="6" width="7" height="7" rx="1.5" fill="#4f46e5"/>
+        <rect x="9" y="6" width="7" height="7" rx="1.5" fill="#4f46e5" opacity="0.4"/>
+        <rect x="0" y="15" width="7" height="7" rx="1.5" fill="#4f46e5" opacity="0.4"/>
+        <rect x="9" y="15" width="7" height="7" rx="1.5" fill="#4f46e5"/>
         <text x="22" y="20" font-family="'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="-0.5" fill="#4f46e5">norde</text>
       </svg>
       <div class="company-sub">Presupuesto comercial</div>
