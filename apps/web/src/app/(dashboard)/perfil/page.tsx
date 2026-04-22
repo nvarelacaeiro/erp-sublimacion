@@ -7,7 +7,7 @@ import { Save, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 
 export default function PerfilPage() {
-  const { user, setUser } = useAuthStore()
+  const { user, token, setAuth } = useAuthStore()
   const qc = useQueryClient()
 
   const [name, setName]         = useState(user?.name ?? '')
@@ -46,7 +46,7 @@ export default function PerfilPage() {
       if (password) body.password = password
 
       const updated = await api.put<any>('/api/auth/profile', body)
-      setUser({ ...user!, name: updated.name })
+      setAuth({ ...user!, name: updated.name }, token!)
       setPassword('')
       setConfirm('')
       setSuccess('Perfil actualizado correctamente.')
