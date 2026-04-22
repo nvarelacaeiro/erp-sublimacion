@@ -71,7 +71,7 @@ export default function CompanyDetailPage() {
     e.preventDefault()
     setUserError('')
     try {
-      await adminApi.addUser(id, newUser)
+      await adminApi.addUser(id, newUser as any)
       setShowAddUser(false)
       setNewUser({ name: '', email: '', password: '', role: 'SELLER' })
       load()
