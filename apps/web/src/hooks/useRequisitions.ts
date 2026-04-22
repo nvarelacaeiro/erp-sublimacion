@@ -28,7 +28,7 @@ export interface Requisition {
   projectId: string | null
   project: { id: string; name: string } | null
   requestedBy: { id: string; name: string }
-  approvedBy: { id: string; name: string } | null
+  approvedBy: { id: string; name: string; phone?: string | null } | null
   purchase?: { id: string; number: number } | null
   items: RequisitionItem[]
   createdAt: string

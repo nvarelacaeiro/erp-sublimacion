@@ -4,6 +4,7 @@ import { MovementRefType } from '@prisma/client'
 import { prisma } from '../lib/prisma'
 import { handleError, NotFoundError } from '../lib/errors'
 import { decreaseStock, increaseStock } from '../services/stock.service'
+import { assertPlanLimit } from '../lib/plan-limits'
 
 const auth = { preHandler: [(app: any) => app.authenticate] }
 
@@ -79,6 +80,9 @@ export async function productRoutes(app: FastifyInstance) {
   app.post('/', authenticate, async (request, reply) => {
     try {
       const { companyId } = request.user as any
+
+      await assertPlanLimit(companyId, 'products')
+
       const data = productSchema.parse(request.body)
 
       const product = await prisma.product.create({

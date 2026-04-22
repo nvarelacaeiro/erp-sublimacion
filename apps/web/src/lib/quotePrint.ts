@@ -32,14 +32,14 @@ export function openQuotePrintWindow(quote: any) {
     .doc-number { font-size: 20px; font-weight: 700; color: #1a1a1a; }
     .doc-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
     .doc-date { font-size: 12px; color: #6b7280; margin-top: 4px; }
-    .divider { border: none; border-top: 2px solid #2ECC8F; margin: 0 0 32px; }
+    .divider { border: none; border-top: 2px solid #4f46e5; margin: 0 0 32px; }
     .client-section { margin-bottom: 32px; }
     .section-label { font-size: 10px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
     .client-name { font-size: 16px; font-weight: 600; color: #1a1a1a; }
     .client-detail { font-size: 12px; color: #6b7280; margin-top: 2px; }
     table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
     thead tr { background: #F0F4F8; }
-    thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; color: #1e3a5f; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #2ECC8F; }
+    thead th { padding: 10px 12px; text-align: left; font-size: 11px; font-weight: 600; color: #4f46e5; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #4f46e5; }
     thead th.center { text-align: center; }
     thead th.right { text-align: right; }
     tbody tr { border-bottom: 1px solid #E8EEF5; }
@@ -49,10 +49,10 @@ export function openQuotePrintWindow(quote: any) {
     td.right { text-align: right; }
     .totals { margin-left: auto; width: 260px; }
     .total-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; color: #6b7280; }
-    .total-row.final { border-top: 2px solid #2ECC8F; margin-top: 8px; padding-top: 12px; font-size: 18px; font-weight: 700; color: #1a1a1a; }
-    .notes { margin-top: 32px; padding: 16px; background: #F0F4F8; border-radius: 8px; border-left: 3px solid #2ECC8F; }
+    .total-row.final { border-top: 2px solid #4f46e5; margin-top: 8px; padding-top: 12px; font-size: 18px; font-weight: 700; color: #1a1a1a; }
+    .notes { margin-top: 32px; padding: 16px; background: #eef2ff; border-radius: 8px; border-left: 3px solid #4f46e5; }
     .notes p { font-size: 12px; color: #6b7280; line-height: 1.6; }
-    .footer { margin-top: 48px; text-align: center; font-size: 11px; color: #2660a0; }
+    .footer { margin-top: 48px; text-align: center; font-size: 11px; color: #6366f1; }
     @media print {
       body { padding: 32px; }
       @page { margin: 0; size: A4; }
@@ -62,9 +62,9 @@ export function openQuotePrintWindow(quote: any) {
 <body>
   <div class="header">
     <div>
-      <svg width="110" height="32" viewBox="0 0 110 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Norde" class="company-logo">
-        <path d="M4 28L20 4M20 4H8M20 4V16" stroke="#1e3a5f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <text x="30" y="23" font-family="'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="-0.5" fill="#1e3a5f">norde</text>
+      <svg width="110" height="28" viewBox="0 0 110 28" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Norde" class="company-logo">
+        <path d="M 7 1 L 13 14 L 7 27 L 1 14 Z" fill="#4f46e5"/>
+        <text x="22" y="20" font-family="'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" letter-spacing="-0.5" fill="#4f46e5">norde</text>
       </svg>
       <div class="company-sub">Presupuesto comercial</div>
     </div>

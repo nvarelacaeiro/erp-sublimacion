@@ -3,6 +3,7 @@ import { z } from 'zod'
 import bcrypt from 'bcryptjs'
 import { prisma } from '../lib/prisma'
 import { handleError, NotFoundError, AppError } from '../lib/errors'
+import { assertPlanLimit } from '../lib/plan-limits'
 
 const createUserSchema = z.object({
   name: z.string().min(1).max(100),
@@ -21,6 +22,25 @@ const updateUserSchema = z.object({
 
 export async function userRoutes(app: FastifyInstance) {
   const authenticate = { preHandler: [app.authenticate] }
+
+  // GET /api/users/approvers — usuarios con rol APPROVER o ADMIN que tienen teléfono
+  app.get('/approvers', authenticate, async (request, reply) => {
+    try {
+      const { companyId } = request.user as any
+      const approvers = await prisma.user.findMany({
+        where: {
+          companyId,
+          active: true,
+          role: { in: ['ADMIN', 'APPROVER'] },
+        },
+        select: { id: true, name: true, phone: true },
+        orderBy: { name: 'asc' },
+      })
+      return reply.send({ data: approvers })
+    } catch (err) {
+      return handleError(reply, err)
+    }
+  })
 
   // GET /api/users
   app.get('/', authenticate, async (request, reply) => {
@@ -47,6 +67,8 @@ export async function userRoutes(app: FastifyInstance) {
       if (role !== 'ADMIN') throw new AppError('Solo administradores pueden crear usuarios', 403)
 
       const input = createUserSchema.parse(request.body)
+
+      await assertPlanLimit(companyId, 'users')
 
       const existing = await prisma.user.findFirst({
         where: { email: input.email, companyId },

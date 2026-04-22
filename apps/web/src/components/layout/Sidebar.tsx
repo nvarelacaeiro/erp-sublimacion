@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Package, Users, Truck, ShoppingCart,
   DollarSign, FileText, CreditCard, ChevronLeft, ChevronRight,
-  LogOut, Tag, UserRound, ClipboardList, PackageCheck, ChevronDown,
+  LogOut, Tag, UserRound, ClipboardList, PackageCheck, ChevronDown, Settings, CircleUser,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/auth.store'
@@ -59,6 +59,8 @@ const NAV_GROUPS: NavGroup[] = [
       { href: '/clients', icon: Users, label: 'Clientes' },
       { href: '/suppliers', icon: Truck, label: 'Proveedores' },
       { href: '/users', icon: UserRound, label: 'Usuarios' },
+      { href: '/configuracion', icon: Settings, label: 'Configuración' },
+      { href: '/perfil', icon: CircleUser, label: 'Mi perfil' },
     ],
   },
 ]

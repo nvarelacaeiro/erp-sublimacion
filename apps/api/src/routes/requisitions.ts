@@ -55,7 +55,7 @@ export async function requisitionRoutes(app: FastifyInstance) {
         where,
         include: {
           requestedBy: { select: { id: true, name: true } },
-          approvedBy: { select: { id: true, name: true } },
+          approvedBy: { select: { id: true, name: true, phone: true } },
           project: { select: { id: true, name: true } },
           purchase: { select: { id: true, number: true } },
           items: {
@@ -90,7 +90,7 @@ export async function requisitionRoutes(app: FastifyInstance) {
         where: { id, companyId },
         include: {
           requestedBy: { select: { id: true, name: true } },
-          approvedBy: { select: { id: true, name: true } },
+          approvedBy: { select: { id: true, name: true, phone: true } },
           project: { select: { id: true, name: true } },
           purchase: { select: { id: true, number: true } },
           items: {

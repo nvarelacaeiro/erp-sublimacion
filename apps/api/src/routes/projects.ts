@@ -4,7 +4,8 @@ import { prisma } from '../lib/prisma'
 import { handleError, NotFoundError } from '../lib/errors'
 
 const createSchema = z.object({
-  name: z.string().min(1).max(120),
+  name:        z.string().min(1).max(120),
+  description: z.string().max(500).optional().nullable(),
 })
 
 export async function projectRoutes(app: FastifyInstance) {
@@ -17,7 +18,7 @@ export async function projectRoutes(app: FastifyInstance) {
       const projects = await prisma.project.findMany({
         where: { companyId },
         orderBy: { name: 'asc' },
-        select: { id: true, name: true, createdAt: true, createdBy: { select: { name: true } } },
+        select: { id: true, name: true, description: true, createdAt: true, createdBy: { select: { name: true } } },
       })
       return reply.send({ data: projects })
     } catch (err) {
@@ -32,8 +33,8 @@ export async function projectRoutes(app: FastifyInstance) {
       const body = createSchema.parse(request.body)
 
       const project = await prisma.project.create({
-        data: { companyId, name: body.name, createdById: userId },
-        select: { id: true, name: true, createdAt: true },
+        data: { companyId, name: body.name, description: body.description ?? null, createdById: userId },
+        select: { id: true, name: true, description: true, createdAt: true },
       })
       return reply.code(201).send({ data: project })
     } catch (err) {

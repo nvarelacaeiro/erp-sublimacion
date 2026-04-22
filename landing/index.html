@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>norde — Gestión simple para tu negocio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            display: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50:  '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+
+    .hero-bg {
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, #e0e7ff 0%, #ffffff 70%);
+    }
+
+    .dark-section {
+      background: #0f172a;
+    }
+
+    .card-hover {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 40px -12px rgba(99,102,241,0.15);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+    .float         { animation: float 4s ease-in-out infinite; }
+    .float-delay   { animation: float 4s ease-in-out 1.5s infinite; }
+    .float-delay2  { animation: float 4s ease-in-out 0.8s infinite; }
+
+    /* Navbar scroll effect */
+    #navbar {
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    #navbar.scrolled {
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 1px 0 #e2e8f0;
+    }
+
+    /* FAQ accordion */
+    .faq-answer {
+      display: none;
+    }
+    .faq-item.open .faq-answer {
+      display: block;
+    }
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg);
+    }
+    .faq-icon { transition: transform 0.2s ease; }
+
+    /* Step connector */
+    .step-connector {
+      height: 2px;
+      background: linear-gradient(90deg, #6366f1, #a5b4fc);
+    }
+
+    /* Mockup app styles */
+    .app-frame {
+      border-radius: 12px;
+      box-shadow: 0 32px 64px -16px rgba(99,102,241,0.2), 0 0 0 1px rgba(99,102,241,0.1);
+      overflow: hidden;
+    }
+    .app-bar {
+      background: #1e293b;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .app-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+    /* Badge pill */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eef2ff;
+      color: #4f46e5;
+      border: 1px solid #c7d2fe;
+      border-radius: 999px;
+      padding: 4px 14px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* Proof badge floating */
+    .proof-badge {
+      background: white;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      box-shadow: 0 8px 24px -4px rgba(0,0,0,0.1);
+      font-size: 13px;
+      font-weight: 500;
+      color: #1e293b;
+      white-space: nowrap;
+    }
+
+    /* WhatsApp button */
+    .btn-wa {
+      background: #22c55e;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: background 0.2s, transform 0.15s;
+      text-decoration: none;
+    }
+    .btn-wa:hover {
+      background: #16a34a;
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: #4f46e5;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: background 0.2s, transform 0.15s;
+      text-decoration: none;
+    }
+    .btn-primary:hover {
+      background: #4338ca;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #334155;
+      border: 1.5px solid #e2e8f0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 26px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      transition: border-color 0.2s, background 0.2s;
+      text-decoration: none;
+    }
+    .btn-secondary:hover {
+      border-color: #a5b4fc;
+      background: #fafafe;
+    }
+
+    /* Gradient text */
+    .gradient-text {
+      background: linear-gradient(135deg, #4f46e5 0%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+  </style>
+</head>
+<body class="font-sans text-slate-800 antialiased bg-white">
+
+<!-- ═══════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════════ -->
+<nav id="navbar" class="fixed top-0 left-0 right-0 z-50">
+  <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+    <!-- Logo -->
+    <a href="#" class="flex items-center gap-2.5">
+      <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center">
+        <svg width="12" height="16" viewBox="0 0 14 18" fill="none">
+          <path d="M 7 0.5 L 13.5 9 L 7 17.5 L 0.5 9 Z" fill="white"/>
+        </svg>
+      </div>
+      <span class="font-display font-700 text-slate-900 text-lg tracking-tight">norde</span>
+    </a>
+
+    <!-- Nav links — desktop -->
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-500">
+      <a href="#problema" class="hover:text-slate-900 transition-colors">Por qué</a>
+      <a href="#features" class="hover:text-slate-900 transition-colors">Funcionalidades</a>
+      <a href="#como-funciona" class="hover:text-slate-900 transition-colors">Cómo funciona</a>
+      <a href="#faq" class="hover:text-slate-900 transition-colors">FAQ</a>
+    </div>
+
+    <!-- CTA -->
+    <a href="https://wa.me/TUNUMERO?text=Hola%2C%20quiero%20una%20demo%20de%20norde" target="_blank" class="btn-wa" style="padding: 10px 20px; font-size: 14px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.09.541 4.054 1.487 5.765L.057 23.882l6.305-1.654A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.817 9.817 0 01-5.006-1.369l-.36-.214-3.732.979 1.001-3.648-.234-.374A9.819 9.819 0 012.18 12C2.18 6.57 6.57 2.18 12 2.18c5.43 0 9.82 4.39 9.82 9.82 0 5.43-4.39 9.818-9.82 9.818z"/></svg>
+      Pedí tu demo
+    </a>
+  </div>
+</nav>
+
+
+<!-- ═══════════════════════════════════════════
+     HERO
+════════════════════════════════════════════ -->
+<section class="hero-bg pt-32 pb-20 px-6 overflow-hidden">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex flex-col lg:flex-row items-center gap-16">
+
+      <!-- Left: copy -->
+      <div class="flex-1 text-center lg:text-left">
+        <div class="badge mb-6">
+          <span style="width:6px;height:6px;border-radius:50%;background:#4f46e5;display:inline-block;"></span>
+          Sistema de gestión para PyMEs
+        </div>
+
+        <h1 class="font-display text-5xl lg:text-6xl font-800 text-slate-900 leading-tight mb-6">
+          Tu negocio creció.<br>
+          <span class="gradient-text">Tu Excel, no.</span>
+        </h1>
+
+        <p class="text-lg text-slate-500 leading-relaxed mb-8 max-w-xl mx-auto lg:mx-0">
+          Presupuestá, vendé y controlá tu negocio desde un solo lugar.
+          Sin planillas complicadas, sin perder datos, sin errores de cálculo.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+          <a href="https://wa.me/TUNUMERO?text=Hola%2C%20quiero%20una%20demo%20de%20norde" target="_blank" class="btn-wa">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.09.541 4.054 1.487 5.765L.057 23.882l6.305-1.654A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.817 9.817 0 01-5.006-1.369l-.36-.214-3.732.979 1.001-3.648-.234-.374A9.819 9.819 0 012.18 12C2.18 6.57 6.57 2.18 12 2.18c5.43 0 9.82 4.39 9.82 9.82 0 5.43-4.39 9.818-9.82 9.818z"/></svg>
+            Quiero una demo
+          </a>
+          <a href="#como-funciona" class="btn-secondary">
+            Ver cómo funciona
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+
+        <!-- Quick trust signals -->
+        <div class="flex flex-wrap gap-4 justify-center lg:justify-start mt-10">
+          <div class="flex items-center gap-2 text-sm text-slate-400">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Sin instalación
+          </div>
+          <div class="flex items-center gap-2 text-sm text-slate-400">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Desde el celular o PC
+          </div>
+          <div class="flex items-center gap-2 text-sm text-slate-400">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Soporte en español
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: App mockup — Nuevo presupuesto (real system style) -->
+      <div class="flex-1 w-full max-w-lg relative">
+        <!-- Floating badges -->
+        <div class="proof-badge float absolute -left-6 top-10 z-10 hidden lg:flex items-center gap-2">
+          <span style="width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;"></span>
+          Presupuesto listo en segundos
+        </div>
+        <div class="proof-badge float-delay absolute -right-4 bottom-14 z-10 hidden lg:flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:#22c55e"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.09.541 4.054 1.487 5.765L.057 23.882l6.305-1.654A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.817 9.817 0 01-5.006-1.369l-.36-.214-3.732.979 1.001-3.648-.234-.374A9.819 9.819 0 012.18 12C2.18 6.57 6.57 2.18 12 2.18c5.43 0 9.82 4.39 9.82 9.82 0 5.43-4.39 9.818-9.82 9.818z"/></svg>
+          Enviado por WhatsApp
+        </div>
+
+        <!-- Browser / Mac frame -->
+        <div class="app-frame float-delay2">
+          <div class="app-bar">
+            <div class="app-dot" style="background:#ff5f57"></div>
+            <div class="app-dot" style="background:#febc2e"></div>
+            <div class="app-dot" style="background:#28c840"></div>
+            <div style="flex:1;background:#334155;border-radius:4px;height:22px;margin-left:8px;display:flex;align-items:center;padding:0 10px;">
+              <span style="font-size:11px;color:#94a3b8;">sistema.app/presupuestos/nuevo</span>
+            </div>
+          </div>
+
+          <!-- App shell: sidebar + content -->
+          <div style="display:flex;min-height:380px;background:#f8fafc;">
+
+            <!-- Sidebar -->
+            <div style="width:148px;background:#1e293b;padding:16px 0;display:flex;flex-direction:column;gap:2px;">
+              <!-- Brand -->
+              <div style="padding:0 14px 14px;border-bottom:1px solid #334155;margin-bottom:8px;">
+                <span style="font-size:13px;font-weight:700;color:#f1f5f9;letter-spacing:-0.3px;">mi negocio</span>
+              </div>
+              <!-- Nav items -->
+              <div style="padding:5px 10px;margin:0 4px;border-radius:7px;display:flex;align-items:center;gap:7px;cursor:pointer;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+                <span style="font-size:11px;color:#64748b;">Dashboard</span>
+              </div>
+              <div style="padding:5px 10px;margin:0 4px;border-radius:7px;display:flex;align-items:center;gap:7px;cursor:pointer;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+                <span style="font-size:11px;color:#64748b;">Productos</span>
+              </div>
+              <div style="padding:5px 10px;margin:0 4px;border-radius:7px;display:flex;align-items:center;gap:7px;cursor:pointer;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+                <span style="font-size:11px;color:#64748b;">Ventas</span>
+              </div>
+              <!-- Active item -->
+              <div style="padding:5px 10px;margin:0 4px;border-radius:7px;background:#334155;display:flex;align-items:center;gap:7px;cursor:pointer;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span style="font-size:11px;color:#c7d2fe;font-weight:600;">Presupuestos</span>
+              </div>
+              <div style="padding:5px 10px;margin:0 4px;border-radius:7px;display:flex;align-items:center;gap:7px;cursor:pointer;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                <span style="font-size:11px;color:#64748b;">Finanzas</span>
+              </div>
+            </div>
+
+            <!-- Main content — new quote form -->
+            <div style="flex:1;padding:18px;overflow:hidden;display:flex;flex-direction:column;gap:10px;">
+              <div style="font-size:13px;font-weight:700;color:#1e293b;">Nuevo presupuesto</div>
+
+              <!-- Client -->
+              <div>
+                <div style="font-size:10px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Cliente</div>
+                <div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:7px 10px;font-size:11px;color:#1e293b;display:flex;justify-content:space-between;align-items:center;">
+                  Juan Martínez
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+              </div>
+
+              <!-- Line item 1 -->
+              <div style="background:white;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                  <span style="font-size:11px;font-weight:600;color:#1e293b;">Remera algodón</span>
+                  <span style="font-size:12px;font-weight:700;color:#4f46e5;">$ 72.000</span>
+                </div>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <div style="background:#f1f5f9;border-radius:4px;padding:2px 7px;font-size:10px;color:#475569;">× 60 un.</div>
+                  <div style="background:#eef2ff;border-radius:4px;padding:2px 7px;font-size:10px;color:#4f46e5;">+ Estampa delantera</div>
+                  <div style="background:#eef2ff;border-radius:4px;padding:2px 7px;font-size:10px;color:#4f46e5;">+ Bordado</div>
+                </div>
+              </div>
+
+              <!-- Line item 2 -->
+              <div style="background:white;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                  <span style="font-size:11px;font-weight:600;color:#1e293b;">Taza cerámica 11oz</span>
+                  <span style="font-size:12px;font-weight:700;color:#4f46e5;">$ 45.000</span>
+                </div>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <div style="background:#f1f5f9;border-radius:4px;padding:2px 7px;font-size:10px;color:#475569;">× 30 un.</div>
+                  <div style="background:#eef2ff;border-radius:4px;padding:2px 7px;font-size:10px;color:#4f46e5;">+ Sublimación full</div>
+                </div>
+              </div>
+
+              <!-- Add product -->
+              <button style="border:1.5px dashed #c7d2fe;border-radius:8px;padding:6px;font-size:10px;color:#6366f1;background:transparent;cursor:pointer;width:100%;">+ Agregar producto</button>
+
+              <!-- Totals -->
+              <div style="background:white;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-top:2px;">
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:#64748b;margin-bottom:3px;">
+                  <span>Subtotal</span><span>$ 117.000</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#1e293b;">
+                  <span>Total</span><span>$ 117.000</span>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div style="display:flex;gap:8px;">
+                <button style="flex:1;background:#4f46e5;color:white;border:none;border-radius:8px;padding:8px;font-size:11px;font-weight:600;cursor:pointer;">Guardar presupuesto</button>
+                <button style="background:#dcfce7;color:#15803d;border:none;border-radius:8px;padding:8px 10px;font-size:10px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.09.541 4.054 1.487 5.765L.057 23.882l6.305-1.654A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.817 9.817 0 01-5.006-1.369l-.36-.214-3.732.979 1.001-3.648-.234-.374A9.819 9.819 0 012.18 12C2.18 6.57 6.57 2.18 12 2.18c5.43 0 9.82 4.39 9.82 9.82 0 5.43-4.39 9.818-9.82 9.818z"/></svg>
+                  WhatsApp
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     PROBLEMA
+════════════════════════════════════════════ -->
+<section id="problema" class="dark-section py-24 px-6">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-14">
+      <p class="text-brand-400 text-sm font-semibold uppercase tracking-widest mb-3">El problema</p>
+      <h2 class="font-display text-4xl font-700 text-white mb-4">¿Te suena familiar?</h2>
+      <p class="text-slate-400 text-lg max-w-xl mx-auto">
+        Así gestionan su negocio la mayoría de las PyMEs. Hasta que descubren que hay una mejor manera.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Pain 1 -->
+      <div style="background:#1e293b; border:1px solid #334155; border-radius:16px; padding:24px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:#7f1d1d;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <p class="text-white font-semibold text-sm mb-2">Presupuestos en Excel que siempre tienen errores</p>
+        <p class="text-slate-400 text-sm leading-relaxed">Fórmulas rotas, precios desactualizados, ítems que se olvidan. Cada presupuesto es un riesgo.</p>
+      </div>
+
+      <!-- Pain 2 -->
+      <div style="background:#1e293b; border:1px solid #334155; border-radius:16px; padding:24px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:#78350f;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fcd34d" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <p class="text-white font-semibold text-sm mb-2">No sabés si cada trabajo te deja ganancia</p>
+        <p class="text-slate-400 text-sm leading-relaxed">Vendés, cobrás, pero al final del mes no entendés por qué no te queda plata.</p>
+      </div>
+
+      <!-- Pain 3 -->
+      <div style="background:#1e293b; border:1px solid #334155; border-radius:16px; padding:24px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:#312e81;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </div>
+        <p class="text-white font-semibold text-sm mb-2">El stock lo llevás en la cabeza o en un papel</p>
+        <p class="text-slate-400 text-sm leading-relaxed">Te enterás que no tenés stock cuando ya prometiste el pedido.</p>
+      </div>
+
+      <!-- Pain 4 -->
+      <div style="background:#1e293b; border:1px solid #334155; border-radius:16px; padding:24px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:#7f1d1d;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fca5a5" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        </div>
+        <p class="text-white font-semibold text-sm mb-2">Un cliente pide precio y tardás horas en responder</p>
+        <p class="text-slate-400 text-sm leading-relaxed">Para cuando mandás el presupuesto, el cliente ya eligió a otro.</p>
+      </div>
+
+      <!-- Pain 5 -->
+      <div style="background:#1e293b; border:1px solid #334155; border-radius:16px; padding:24px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:#78350f;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fcd34d" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        </div>
+        <p class="text-white font-semibold text-sm mb-2">Deudas por cobrar que ya no recordás</p>
+        <p class="text-slate-400 text-sm leading-relaxed">¿Quién te debe? ¿Cuánto? ¿Desde cuándo? La respuesta está en algún chat de WhatsApp.</p>
+      </div>
+
+      <!-- Pain 6 -->
+      <div style="background:#1e293b; border:1px solid #334155; border-radius:16px; padding:24px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:#312e81;display:flex;align-items:center;justify-content:center;margin-bottom:14px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <p class="text-white font-semibold text-sm mb-2">Cuando entra alguien nuevo, tenés que explicar todo</p>
+        <p class="text-slate-400 text-sm leading-relaxed">No hay sistema. Todo está en la cabeza del dueño. Y eso no escala.</p>
+      </div>
+    </div>
+
+    <!-- Bridge -->
+    <div class="text-center mt-14">
+      <div style="display:inline-flex;align-items:center;gap:10px;background:#14532d;border:1px solid #166534;border-radius:12px;padding:14px 28px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <span style="color:#4ade80;font-weight:600;font-size:15px;">Hay una mejor manera de gestionar tu negocio.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     FEATURES
+════════════════════════════════════════════ -->
+<section id="features" class="py-24 px-6 bg-white">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-14">
+      <p class="text-brand-500 text-sm font-semibold uppercase tracking-widest mb-3">Funcionalidades</p>
+      <h2 class="font-display text-4xl font-700 text-slate-900 mb-4">
+        Todo en un solo lugar
+      </h2>
+      <p class="text-slate-500 text-lg max-w-xl mx-auto">
+        Reemplazá las planillas, los papeles y el caos. Con un sistema diseñado para que lo puedas usar desde el primer día.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+      <!-- Feature 1 -->
+      <div class="card-hover rounded-2xl border border-slate-100 p-6" style="background:#fafafa;">
+        <div style="width:44px;height:44px;border-radius:12px;background:#eef2ff;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-base mb-2">Presupuestos en segundos</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Configurá tus productos una vez y el precio se calcula automáticamente. Incluye extras, cantidades y descuentos.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="card-hover rounded-2xl border border-slate-100 p-6" style="background:#fafafa;">
+        <div style="width:44px;height:44px;border-radius:12px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-base mb-2">Stock en tiempo real</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">El inventario se actualiza solo con cada venta y compra. Alertas automáticas cuando un producto está por agotarse.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="card-hover rounded-2xl border border-slate-100 p-6" style="background:#fafafa;">
+        <div style="width:44px;height:44px;border-radius:12px;background:#fef3c7;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-base mb-2">Ventas y cobros</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Convertí un presupuesto en venta con un click. Registrá cobros, deudas y pagos de proveedores en un solo lugar.</p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="card-hover rounded-2xl border border-slate-100 p-6" style="background:#fafafa;">
+        <div style="width:44px;height:44px;border-radius:12px;background:#fdf2f8;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-base mb-2">Finanzas claras</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Ingresos, egresos, ganancia neta y rentabilidad por producto. Sabés exactamente cómo está tu negocio en cualquier momento.</p>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="card-hover rounded-2xl border border-slate-100 p-6" style="background:#fafafa;">
+        <div style="width:44px;height:44px;border-radius:12px;background:#ecfdf5;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color:#22c55e;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.09.541 4.054 1.487 5.765L.057 23.882l6.305-1.654A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.817 9.817 0 01-5.006-1.369l-.36-.214-3.732.979 1.001-3.648-.234-.374A9.819 9.819 0 012.18 12C2.18 6.57 6.57 2.18 12 2.18c5.43 0 9.82 4.39 9.82 9.82 0 5.43-4.39 9.818-9.82 9.818z"/></svg>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-base mb-2">Compartí por WhatsApp</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Generá presupuestos profesionales y mandálos directamente por WhatsApp. El cliente recibe un PDF prolijo al instante.</p>
+      </div>
+
+      <!-- Feature 6 -->
+      <div class="card-hover rounded-2xl border border-slate-100 p-6" style="background:#fafafa;">
+        <div style="width:44px;height:44px;border-radius:12px;background:#f0f9ff;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-base mb-2">Multi-usuario</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Todo tu equipo trabaja en el mismo sistema, desde cualquier dispositivo. Sin versiones desactualizadas ni información duplicada.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     CÓMO FUNCIONA
+════════════════════════════════════════════ -->
+<section id="como-funciona" class="py-24 px-6" style="background:#f8fafc;">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-14">
+      <p class="text-brand-500 text-sm font-semibold uppercase tracking-widest mb-3">Proceso</p>
+      <h2 class="font-display text-4xl font-700 text-slate-900 mb-4">Tan simple como suena</h2>
+      <p class="text-slate-500 text-lg max-w-xl mx-auto">
+        Sin implementaciones complicadas, sin consultoras, sin meses de capacitación.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6 relative">
+      <!-- Connector lines (desktop only) -->
+      <div class="hidden md:block absolute top-10 left-1/3 right-1/3 step-connector"></div>
+
+      <!-- Step 1 -->
+      <div class="text-center">
+        <div style="width:56px;height:56px;border-radius:16px;background:#4f46e5;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 20px -4px rgba(79,70,229,0.4);">
+          <span style="color:white;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;">1</span>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-lg mb-3">Cargás tus productos</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Subís tu catálogo con precios, costos, stock y extras configurables. Una sola vez.</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="text-center">
+        <div style="width:56px;height:56px;border-radius:16px;background:#4f46e5;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 20px -4px rgba(79,70,229,0.4);">
+          <span style="color:white;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;">2</span>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-lg mb-3">Presupuestás en segundos</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Elegís el cliente, los productos y la cantidad. El precio se calcula solo. Lo mandás por WhatsApp al instante.</p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="text-center">
+        <div style="width:56px;height:56px;border-radius:16px;background:#4f46e5;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 20px -4px rgba(79,70,229,0.4);">
+          <span style="color:white;font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:20px;">3</span>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-lg mb-3">Controlás todo el negocio</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">Stock, ventas, compras, finanzas. Todo actualizado en tiempo real, desde cualquier dispositivo.</p>
+      </div>
+    </div>
+
+    <!-- Dashboard mockup — real system style -->
+    <div class="mt-16 app-frame">
+      <div class="app-bar">
+        <div class="app-dot" style="background:#ff5f57"></div>
+        <div class="app-dot" style="background:#febc2e"></div>
+        <div class="app-dot" style="background:#28c840"></div>
+        <div style="flex:1;background:#334155;border-radius:4px;height:22px;margin-left:8px;display:flex;align-items:center;padding:0 10px;">
+          <span style="font-size:11px;color:#94a3b8;">sistema.app/dashboard</span>
+        </div>
+      </div>
+
+      <!-- App shell -->
+      <div style="display:flex;background:#f8fafc;min-height:320px;">
+
+        <!-- Sidebar -->
+        <div style="width:150px;background:#1e293b;border-right:1px solid #334155;padding:14px 0;display:flex;flex-direction:column;gap:2px;flex-shrink:0;">
+          <div style="padding:0 14px 12px;border-bottom:1px solid #334155;margin-bottom:6px;">
+            <span style="font-size:12px;font-weight:700;color:#f1f5f9;">mi negocio</span>
+          </div>
+          <!-- Active: Dashboard -->
+          <div style="padding:5px 10px;margin:0 4px;border-radius:7px;background:#334155;display:flex;align-items:center;gap:7px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            <span style="font-size:11px;color:#c7d2fe;font-weight:600;">Dashboard</span>
+          </div>
+          <div style="padding:5px 10px;margin:0 4px;border-radius:7px;display:flex;align-items:center;gap:7px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+            <span style="font-size:11px;color:#475569;">Productos</span>
+          </div>
+          <div style="padding:5px 10px;margin:0 4px;border-radius:7px;display:flex;align-items:center;gap:7px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <span style="font-size:11px;color:#475569;">Clientes</span>
+          </div>
+          <div style="padding:5px 10px;margin:0 4px;border-radius:7px;display:flex;align-items:center;gap:7px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/></svg>
+            <span style="font-size:11px;color:#475569;">Ventas</span>
+          </div>
+          <div style="padding:5px 10px;margin:0 4px;border-radius:7px;display:flex;align-items:center;gap:7px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span style="font-size:11px;color:#475569;">Presupuestos</span>
+          </div>
+          <div style="padding:5px 10px;margin:0 4px;border-radius:7px;display:flex;align-items:center;gap:7px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#475569" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            <span style="font-size:11px;color:#475569;">Finanzas</span>
+          </div>
+        </div>
+
+        <!-- Main content -->
+        <div style="flex:1;padding:18px;overflow:hidden;display:flex;flex-direction:column;gap:12px;">
+
+          <!-- Period tabs -->
+          <div style="display:flex;gap:4px;">
+            <div style="padding:4px 10px;background:white;border-radius:6px;font-size:10px;font-weight:600;color:#4f46e5;box-shadow:0 1px 3px rgba(0,0,0,0.08);">Mes</div>
+            <div style="padding:4px 10px;border-radius:6px;font-size:10px;color:#64748b;">3 meses</div>
+            <div style="padding:4px 10px;border-radius:6px;font-size:10px;color:#64748b;">Año</div>
+            <div style="margin-left:auto;font-size:10px;color:#94a3b8;padding-top:4px;">Abril 2026</div>
+          </div>
+
+          <!-- KPI cards -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+            <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:12px;">
+              <div style="width:24px;height:24px;border-radius:6px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              </div>
+              <div style="font-size:15px;font-weight:700;color:#1e293b;">$ 2.840.000</div>
+              <div style="font-size:9px;color:#64748b;margin-top:2px;">Ventas · 18 ops</div>
+            </div>
+            <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:12px;">
+              <div style="width:24px;height:24px;border-radius:6px;background:#eef2ff;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>
+              </div>
+              <div style="font-size:15px;font-weight:700;color:#1e293b;">$ 2.840.000</div>
+              <div style="font-size:9px;color:#64748b;margin-top:2px;">Ingresos</div>
+            </div>
+            <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:12px;">
+              <div style="width:24px;height:24px;border-radius:6px;background:#fff1f2;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/></svg>
+              </div>
+              <div style="font-size:15px;font-weight:700;color:#1e293b;">$ 980.000</div>
+              <div style="font-size:9px;color:#64748b;margin-top:2px;">Egresos</div>
+            </div>
+            <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:12px;">
+              <div style="width:24px;height:24px;border-radius:6px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;margin-bottom:8px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>
+              </div>
+              <div style="font-size:15px;font-weight:700;color:#16a34a;">$ 1.860.000</div>
+              <div style="font-size:9px;color:#64748b;margin-top:2px;">Ganancia</div>
+            </div>
+          </div>
+
+          <!-- Chart + Stock bajo -->
+          <div style="display:grid;grid-template-columns:1fr 180px;gap:10px;flex:1;">
+            <!-- Chart -->
+            <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:14px;">
+              <div style="font-size:11px;font-weight:600;color:#1e293b;margin-bottom:12px;">Ingresos vs Egresos</div>
+              <!-- SVG line chart approximation -->
+              <svg width="100%" height="80" viewBox="0 0 300 80" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="gi" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.15"/>
+                    <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+                  </linearGradient>
+                  <linearGradient id="ge" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#f87171" stop-opacity="0.1"/>
+                    <stop offset="100%" stop-color="#f87171" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <!-- Grid lines -->
+                <line x1="0" y1="20" x2="300" y2="20" stroke="#f1f5f9" stroke-width="1"/>
+                <line x1="0" y1="40" x2="300" y2="40" stroke="#f1f5f9" stroke-width="1"/>
+                <line x1="0" y1="60" x2="300" y2="60" stroke="#f1f5f9" stroke-width="1"/>
+                <!-- Income area -->
+                <path d="M0,60 C50,55 100,40 150,30 C200,20 250,15 300,10 L300,80 L0,80 Z" fill="url(#gi)"/>
+                <!-- Income line -->
+                <path d="M0,60 C50,55 100,40 150,30 C200,20 250,15 300,10" fill="none" stroke="#6366f1" stroke-width="2"/>
+                <!-- Expense area -->
+                <path d="M0,70 C50,68 100,65 150,60 C200,55 250,52 300,50 L300,80 L0,80 Z" fill="url(#ge)"/>
+                <!-- Expense line -->
+                <path d="M0,70 C50,68 100,65 150,60 C200,55 250,52 300,50" fill="none" stroke="#f87171" stroke-width="2"/>
+                <!-- Dot on current -->
+                <circle cx="300" cy="10" r="4" fill="#6366f1"/>
+                <circle cx="300" cy="50" r="4" fill="#f87171"/>
+              </svg>
+              <div style="display:flex;gap:14px;margin-top:6px;">
+                <div style="display:flex;align-items:center;gap:4px;font-size:9px;color:#64748b;"><span style="width:8px;height:8px;border-radius:50%;background:#6366f1;display:inline-block;"></span>Ingresos</div>
+                <div style="display:flex;align-items:center;gap:4px;font-size:9px;color:#64748b;"><span style="width:8px;height:8px;border-radius:50%;background:#f87171;display:inline-block;"></span>Egresos</div>
+              </div>
+            </div>
+
+            <!-- Stock bajo panel -->
+            <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:14px;">
+              <div style="font-size:11px;font-weight:600;color:#1e293b;margin-bottom:10px;">Stock bajo</div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13" stroke="white" stroke-width="2"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="white" stroke-width="2"/></svg>
+                  <div>
+                    <div style="font-size:10px;font-weight:500;color:#1e293b;">Papel transfer A4</div>
+                    <div style="font-size:9px;color:#94a3b8;">3 / mín 10</div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13" stroke="white" stroke-width="2"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="white" stroke-width="2"/></svg>
+                  <div>
+                    <div style="font-size:10px;font-weight:500;color:#1e293b;">Tinta negra 500ml</div>
+                    <div style="font-size:9px;color:#94a3b8;">1 / mín 5</div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13" stroke="white" stroke-width="2"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="white" stroke-width="2"/></svg>
+                  <div>
+                    <div style="font-size:10px;font-weight:500;color:#1e293b;">Remera blanca XL</div>
+                    <div style="font-size:9px;color:#94a3b8;">2 / mín 5</div>
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="#f59e0b"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13" stroke="white" stroke-width="2"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="white" stroke-width="2"/></svg>
+                  <div>
+                    <div style="font-size:10px;font-weight:500;color:#1e293b;">Taza cerámica 11oz</div>
+                    <div style="font-size:9px;color:#94a3b8;">4 / mín 10</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     FAQ
+════════════════════════════════════════════ -->
+<section id="faq" class="py-24 px-6 bg-white">
+  <div class="max-w-2xl mx-auto">
+    <div class="text-center mb-12">
+      <p class="text-brand-500 text-sm font-semibold uppercase tracking-widest mb-3">Preguntas frecuentes</p>
+      <h2 class="font-display text-4xl font-700 text-slate-900">¿Tenés dudas?</h2>
+    </div>
+
+    <div class="space-y-3" id="faq-list">
+
+      <div class="faq-item border border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-trigger w-full text-left px-6 py-5 flex items-center justify-between gap-4" onclick="toggleFaq(this)">
+          <span class="font-semibold text-slate-900 text-sm">¿Necesito saber de tecnología para usarlo?</span>
+          <span class="faq-icon text-slate-400 shrink-0 text-xl font-light">+</span>
+        </button>
+        <div class="faq-answer px-6 pb-5">
+          <p class="text-slate-500 text-sm leading-relaxed">No. Si podés usar WhatsApp, podés usar este sistema. Está diseñado para dueños de negocio que necesitan resultados rápidos, no para técnicos. La curva de aprendizaje es mínima.</p>
+        </div>
+      </div>
+
+      <div class="faq-item border border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-trigger w-full text-left px-6 py-5 flex items-center justify-between gap-4" onclick="toggleFaq(this)">
+          <span class="font-semibold text-slate-900 text-sm">¿Puedo importar mis productos y clientes desde Excel?</span>
+          <span class="faq-icon text-slate-400 shrink-0 text-xl font-light">+</span>
+        </button>
+        <div class="faq-answer px-6 pb-5">
+          <p class="text-slate-500 text-sm leading-relaxed">Sí. El sistema incluye importación masiva desde archivos Excel o CSV para productos, clientes, proveedores y categorías. No tenés que cargar todo de cero.</p>
+        </div>
+      </div>
+
+      <div class="faq-item border border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-trigger w-full text-left px-6 py-5 flex items-center justify-between gap-4" onclick="toggleFaq(this)">
+          <span class="font-semibold text-slate-900 text-sm">¿Funciona desde el celular?</span>
+          <span class="faq-icon text-slate-400 shrink-0 text-xl font-light">+</span>
+        </button>
+        <div class="faq-answer px-6 pb-5">
+          <p class="text-slate-500 text-sm leading-relaxed">Sí, funciona perfectamente en celular, tablet y computadora. No hay nada que instalar — es una aplicación web que se abre directo desde el navegador.</p>
+        </div>
+      </div>
+
+      <div class="faq-item border border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-trigger w-full text-left px-6 py-5 flex items-center justify-between gap-4" onclick="toggleFaq(this)">
+          <span class="font-semibold text-slate-900 text-sm">¿Mis datos están seguros?</span>
+          <span class="faq-icon text-slate-400 shrink-0 text-xl font-light">+</span>
+        </button>
+        <div class="faq-answer px-6 pb-5">
+          <p class="text-slate-500 text-sm leading-relaxed">Sí. Los datos se almacenan en la nube con backups automáticos. No corrés el riesgo de perder nada por un disco roto o una computadora que se apaga.</p>
+        </div>
+      </div>
+
+      <div class="faq-item border border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-trigger w-full text-left px-6 py-5 flex items-center justify-between gap-4" onclick="toggleFaq(this)">
+          <span class="font-semibold text-slate-900 text-sm">¿Para qué tipo de negocio sirve?</span>
+          <span class="faq-icon text-slate-400 shrink-0 text-xl font-light">+</span>
+        </button>
+        <div class="faq-answer px-6 pb-5">
+          <p class="text-slate-500 text-sm leading-relaxed">Para cualquier negocio que venda productos o servicios, maneje stock, haga presupuestos y quiera tener control financiero real. Funciona especialmente bien en PyMEs de 1 a 20 personas que ya le quedaron chicas las planillas de Excel.</p>
+        </div>
+      </div>
+
+      <div class="faq-item border border-slate-200 rounded-2xl overflow-hidden">
+        <button class="faq-trigger w-full text-left px-6 py-5 flex items-center justify-between gap-4" onclick="toggleFaq(this)">
+          <span class="font-semibold text-slate-900 text-sm">¿Cómo arranco?</span>
+          <span class="faq-icon text-slate-400 shrink-0 text-xl font-light">+</span>
+        </button>
+        <div class="faq-answer px-6 pb-5">
+          <p class="text-slate-500 text-sm leading-relaxed">Pedís una demo por WhatsApp, te mostramos el sistema en vivo y te ayudamos a configurar todo según tu negocio. Sin contratos largos, sin letra chica.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     FINAL CTA
+════════════════════════════════════════════ -->
+<section class="dark-section py-24 px-6">
+  <div class="max-w-3xl mx-auto text-center">
+    <p class="text-brand-400 text-sm font-semibold uppercase tracking-widest mb-4">Empezá ahora</p>
+    <h2 class="font-display text-4xl lg:text-5xl font-800 text-white mb-6 leading-tight">
+      Tu negocio merece algo mejor que una planilla de Excel.
+    </h2>
+    <p class="text-slate-400 text-lg mb-10 max-w-xl mx-auto">
+      Pedí una demo por WhatsApp y te mostramos el sistema adaptado a tu negocio. Sin compromiso, sin letra chica.
+    </p>
+
+    <a href="https://wa.me/TUNUMERO?text=Hola%2C%20quiero%20ver%20una%20demo%20de%20norde" target="_blank" class="btn-wa" style="font-size:16px; padding:16px 32px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.09.541 4.054 1.487 5.765L.057 23.882l6.305-1.654A11.954 11.954 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.817 9.817 0 01-5.006-1.369l-.36-.214-3.732.979 1.001-3.648-.234-.374A9.819 9.819 0 012.18 12C2.18 6.57 6.57 2.18 12 2.18c5.43 0 9.82 4.39 9.82 9.82 0 5.43-4.39 9.818-9.82 9.818z"/></svg>
+      Quiero ver el sistema
+    </a>
+
+    <div class="flex flex-wrap gap-6 justify-center mt-10">
+      <div class="flex items-center gap-2 text-sm text-slate-400">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Sin instalación
+      </div>
+      <div class="flex items-center gap-2 text-sm text-slate-400">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Sin contratos
+      </div>
+      <div class="flex items-center gap-2 text-sm text-slate-400">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Soporte en español
+      </div>
+      <div class="flex items-center gap-2 text-sm text-slate-400">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Desde cualquier dispositivo
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══════════════════════════════════════════
+     FOOTER
+════════════════════════════════════════════ -->
+<footer style="background:#0f172a; border-top:1px solid #1e293b;" class="px-6 py-10">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2.5">
+      <div class="w-7 h-7 rounded-lg bg-brand-600 flex items-center justify-center">
+        <svg width="10" height="14" viewBox="0 0 14 18" fill="none">
+          <path d="M 7 0.5 L 13.5 9 L 7 17.5 L 0.5 9 Z" fill="white"/>
+        </svg>
+      </div>
+      <span class="font-display font-700 text-slate-300 text-base">norde</span>
+    </div>
+    <p class="text-slate-500 text-sm">Sistema de gestión para PyMEs · 2025</p>
+    <a href="https://wa.me/TUNUMERO" target="_blank" class="text-sm text-slate-400 hover:text-white transition-colors">Contacto</a>
+  </div>
+</footer>
+
+
+<!-- ═══════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════ -->
+<script>
+  // Navbar scroll effect
+  const navbar = document.getElementById('navbar')
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 20)
+  })
+
+  // FAQ accordion
+  function toggleFaq(btn) {
+    const item = btn.closest('.faq-item')
+    const isOpen = item.classList.contains('open')
+    // Close all
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'))
+    // Open clicked if it was closed
+    if (!isOpen) item.classList.add('open')
+  }
+
+  // no bar animation needed — SVG chart is static
+</script>
+
+</body>
+</html>

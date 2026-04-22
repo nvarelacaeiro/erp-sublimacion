@@ -16,11 +16,12 @@ import {
 } from '@/hooks/useRequisitions'
 import { useProjects, useCreateProject } from '@/hooks/useProjects'
 import { useCreatePurchase } from '@/hooks/usePurchases'
+import { useSettings } from '@/hooks/useSettings'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import {
   ClipboardList, Plus, ChevronDown, ChevronUp, Trash2, Send,
-  CheckCircle2, XCircle, ShoppingCart, Pencil, X, Check, Building2,
+  CheckCircle2, XCircle, ShoppingCart, Pencil, X, Check, Building2, FileDown,
 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/shared/EmptyState'
@@ -29,6 +30,7 @@ import { PurchaseForm } from '@/components/shared/PurchaseForm'
 import { ExportButton } from '@/components/shared/ExportButton'
 import { AuditLogPanel } from '@/components/shared/AuditLogPanel'
 import { cn } from '@/lib/utils'
+import { printRequisitionList, printSingleRequisition } from '@/lib/requisitionListPrint'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -99,9 +101,10 @@ function emptyItem(): FormItem {
 interface RequisitionFormProps {
   initial?: Requisition | null
   onClose: () => void
+  projectLabel?: string
 }
 
-function RequisitionForm({ initial, onClose }: RequisitionFormProps) {
+function RequisitionForm({ initial, onClose, projectLabel = 'Obra' }: RequisitionFormProps) {
   const products = useQuery({
     queryKey: ['products-list'],
     queryFn: () => api.get<{ id: string; name: string; sku: string | null; unit: string }[]>('/api/products'),
@@ -214,24 +217,24 @@ function RequisitionForm({ initial, onClose }: RequisitionFormProps) {
       {/* Obra */}
       <div>
         <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
-          <Building2 size={12} className="inline mr-1" />Obra
+          <Building2 size={12} className="inline mr-1" />{projectLabel}
         </label>
         <select
           value={projectId}
           onChange={e => { setProjectId(e.target.value); setNewProjectName('') }}
           className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
         >
-          <option value="">Sin obra asignada</option>
+          <option value="">Sin {projectLabel.toLowerCase()} asignada</option>
           {projects.map(p => (
             <option key={p.id} value={p.id}>{p.name}</option>
           ))}
-          <option value="__new__">+ Nueva obra...</option>
+          <option value="__new__">+ Nueva {projectLabel.toLowerCase()}...</option>
         </select>
         {isCreatingNewProject && (
           <input
             value={newProjectName}
             onChange={e => setNewProjectName(e.target.value)}
-            placeholder="Nombre de la nueva obra *"
+            placeholder={`Nombre de la nueva ${projectLabel.toLowerCase()} *`}
             autoFocus
             className="mt-2 w-full px-3 py-2 text-sm border border-primary-400 dark:border-primary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-slate-800 dark:text-slate-100"
           />
@@ -434,9 +437,11 @@ interface RequisitionCardProps {
   userId: string
   onEdit: (r: Requisition) => void
   onConvert: (r: Requisition) => void
+  approversWithPhone: { id: string; name: string; phone: string | null }[]
+  projectLabel: string
 }
 
-function RequisitionCard({ req, role, userId, onEdit, onConvert }: RequisitionCardProps) {
+function RequisitionCard({ req, role, userId, onEdit, onConvert, approversWithPhone, projectLabel }: RequisitionCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [rejectOpen, setRejectOpen] = useState(false)
   const [actionError, setActionError] = useState('')
@@ -520,19 +525,20 @@ function RequisitionCard({ req, role, userId, onEdit, onConvert }: RequisitionCa
                 <Send size={15} />
               </button>
             )}
-            {req.status === 'PENDING' && (
+            {req.status === 'PENDING' && approversWithPhone.map(approver => (
               <a
-                href={`https://wa.me/5493513052919?text=${encodeURIComponent(`Hola, hay una solicitud de compra pendiente de aprobación en el sistema:\n\n📋 #${req.number} - ${req.title}${req.project ? `\n🏗️ Obra: ${req.project.name}` : ''}\nSolicitado por: ${req.requestedBy.name}\n\nPor favor ingresá al sistema para aprobarla o rechazarla.`)}`}
+                key={approver.id}
+                href={`https://wa.me/${approver.phone}?text=${encodeURIComponent(`Hola ${approver.name}, hay una solicitud de compra pendiente de aprobación:\n\n📋 #${req.number} - ${req.title}${req.project ? `\n🏗️ ${projectLabel}: ${req.project.name}` : ''}\nSolicitado por: ${req.requestedBy.name}\n\nPor favor ingresá al sistema para aprobarla o rechazarla.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Avisar por WhatsApp"
+                title={`Avisar a ${approver.name} por WhatsApp`}
                 className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:text-green-600 dark:hover:text-green-400"
               >
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
                   <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                 </svg>
               </a>
-            )}
+            ))}
             {canApprove && req.status === 'PENDING' && (
               <>
                 <button
@@ -552,6 +558,13 @@ function RequisitionCard({ req, role, userId, onEdit, onConvert }: RequisitionCa
                 </button>
               </>
             )}
+            <button
+              onClick={() => printSingleRequisition(req)}
+              title="Descargar PDF"
+              className="p-2 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 dark:hover:text-primary-400"
+            >
+              <FileDown size={15} />
+            </button>
             {/* canConvert se muestra como banner abajo, no como ícono */}
             {canEdit && (
               <button
@@ -693,6 +706,15 @@ export default function RequisitionsPage() {
   const role = user?.role ?? 'REQUESTER'
   const userId = user?.id ?? ''
 
+  const { data: settings } = useSettings()
+  const projectLabel = settings?.projectLabel ?? 'Obra'
+
+  const { data: approvers = [] } = useQuery({
+    queryKey: ['approvers'],
+    queryFn: () => api.get<{ id: string; name: string; phone: string | null }[]>('/api/users/approvers'),
+  })
+  const approversWithPhone = approvers.filter(a => a.phone)
+
   const { data: requisitions = [], isLoading } = useRequisitions()
   const [showForm, setShowForm] = useState(false)
   const [editTarget, setEditTarget] = useState<Requisition | null>(null)
@@ -781,6 +803,16 @@ export default function RequisitionsPage() {
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {canApprove && pendingCount > 0 && (
+            <button
+              onClick={() => printRequisitionList(requisitions, projectLabel)}
+              title="Descargar lista para cotizar con proveedores"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium border border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+            >
+              <FileDown size={15} />
+              <span className="hidden sm:inline">Lista para cotizar</span>
+            </button>
+          )}
           <ExportButton
             filename="solicitudes"
             sheetName="Solicitudes"
@@ -815,7 +847,7 @@ export default function RequisitionsPage() {
                 : 'Editar solicitud'
               : 'Nueva solicitud'}
           </h2>
-          <RequisitionForm initial={editTarget} onClose={handleCloseForm} />
+          <RequisitionForm initial={editTarget} onClose={handleCloseForm} projectLabel={projectLabel} />
         </div>
       )}
 
@@ -863,6 +895,8 @@ export default function RequisitionsPage() {
               userId={userId}
               onEdit={handleEdit}
               onConvert={handleConvert}
+              approversWithPhone={approversWithPhone}
+              projectLabel={projectLabel}
             />
           ))}
         </div>

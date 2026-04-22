@@ -4,35 +4,23 @@ interface NordeLogoProps {
 }
 
 export function SiTiendaLogo({ className = '', collapsed = false }: NordeLogoProps) {
-  if (collapsed) return null
-
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {/* Arrow icon — north-east direction */}
-      <svg
-        width="22"
-        height="22"
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden="true"
-        className="shrink-0"
-      >
+      <svg width="14" height="18" viewBox="0 0 14 18" fill="none" aria-hidden="true" className="shrink-0">
         <path
-          d="M5 19L19 5M19 5H9M19 5V15"
-          className="stroke-primary-700 dark:stroke-primary-400"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+          d="M 7 0.5 L 13.5 9 L 7 17.5 L 0.5 9 Z"
+          className="fill-primary-600 dark:fill-primary-500"
         />
       </svg>
-      {/* Wordmark */}
-      <span
-        className="text-primary-700 dark:text-primary-400 font-bold tracking-tight select-none"
-        style={{ fontSize: '1.2rem', fontFamily: "'Inter', system-ui" }}
-        aria-label="Norde"
-      >
-        norde
-      </span>
+      {!collapsed && (
+        <span
+          className="font-bold tracking-tight select-none text-slate-900 dark:text-slate-100"
+          style={{ fontSize: '1.1rem', fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui" }}
+          aria-label="Norde"
+        >
+          norde
+        </span>
+      )}
     </div>
   )
 }

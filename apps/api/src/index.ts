@@ -20,9 +20,15 @@ import { requisitionRoutes } from './routes/requisitions'
 import { deliveryNoteRoutes } from './routes/delivery-notes'
 import { auditRoutes } from './routes/audit'
 import { projectRoutes } from './routes/projects'
+import { adminRoutes } from './routes/admin'
+import { settingsRoutes } from './routes/settings'
 import { runStockAlertCheck } from './services/stock-alert.service'
 
-const app = Fastify({ logger: process.env.NODE_ENV !== 'production' })
+const app = Fastify({
+  logger: process.env.NODE_ENV === 'production'
+    ? true
+    : { level: 'warn' },
+})
 
 // ── Plugins ──────────────────────────────────────────────────
 app.register(cors, {
@@ -63,6 +69,8 @@ app.register(requisitionRoutes, { prefix: '/api/requisitions' })
 app.register(deliveryNoteRoutes, { prefix: '/api/delivery-notes' })
 app.register(auditRoutes, { prefix: '/api/audit' })
 app.register(projectRoutes, { prefix: '/api/projects' })
+app.register(adminRoutes,    { prefix: '/api/admin' })
+app.register(settingsRoutes, { prefix: '/api/settings' })
 
 // ── Health check ─────────────────────────────────────────────
 app.get('/health', async () => ({ status: 'ok', timestamp: new Date().toISOString() }))

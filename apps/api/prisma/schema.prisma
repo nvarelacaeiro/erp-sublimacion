@@ -16,12 +16,23 @@ datasource db {
 // MULTITENANCY
 // ============================================================
 
+enum CompanyPlan {
+  TRIAL
+  STARTER
+  PRO
+}
+
 model Company {
-  id        String   @id @default(cuid())
-  name      String
-  settings  Json     @default("{}")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id          String      @id @default(cuid())
+  name        String
+  slug        String?     @unique  // subdominio: empresa.norde.ar
+  plan        CompanyPlan @default(TRIAL)
+  trialEndsAt DateTime?   @map("trial_ends_at")
+  active      Boolean     @default(true)
+  suspended   Boolean     @default(false) // true cuando vence trial o no pagan
+  settings    Json        @default("{}")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
 
   users         User[]
   categories    Category[]
@@ -58,6 +69,7 @@ model User {
   name         String
   email        String
   passwordHash String   @map("password_hash")
+  phone        String?  // WhatsApp del usuario
   role         UserRole @default(SELLER)
   active       Boolean  @default(true)
   createdAt    DateTime @default(now()) @map("created_at")
@@ -605,6 +617,7 @@ model Project {
   id          String   @id @default(cuid())
   companyId   String   @map("company_id")
   name        String
+  description String?  // descripción del proyecto/obra
   createdById String   @map("created_by_id")
   createdAt   DateTime @default(now()) @map("created_at")
 
