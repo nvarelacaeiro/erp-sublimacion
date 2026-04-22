@@ -74,39 +74,34 @@ export default function CompaniesPage() {
               <Link
                 key={c.id}
                 href={`/admin/companies/${c.id}`}
-                className="flex items-center gap-4 px-5 py-4 hover:bg-slate-800/50 transition-colors"
+                className="flex items-center gap-3 px-4 py-3.5 hover:bg-slate-800/50 transition-colors"
               >
-                {/* Estado activo */}
+                {/* Estado */}
                 <div className="shrink-0">
                   {c.active
-                    ? <CheckCircle size={16} className="text-emerald-400" />
-                    : <XCircle size={16} className="text-slate-600" />}
+                    ? <CheckCircle size={15} className="text-emerald-400" />
+                    : <XCircle size={15} className="text-slate-600" />}
                 </div>
 
                 {/* Info principal */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold text-slate-100">{c.name}</span>
-                    {c.slug && (
-                      <span className="text-xs text-slate-500 font-mono">{c.slug}.norde.ar</span>
-                    )}
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${PLAN_COLOR[c.plan]}`}>
+                    <span className="text-sm font-semibold text-slate-100 truncate">{c.name}</span>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${PLAN_COLOR[c.plan]}`}>
                       {PLAN_LABEL[c.plan]}
                     </span>
                   </div>
-                  {c.plan === 'TRIAL' && daysLeft !== null && (
-                    <div className="flex items-center gap-1 mt-0.5 text-xs text-slate-500">
-                      <Clock size={10} />
-                      {daysLeft > 0 ? `${daysLeft} días de trial` : 'Trial vencido'}
-                    </div>
-                  )}
-                </div>
-
-                {/* Contadores */}
-                <div className="flex items-center gap-4 text-xs text-slate-500 shrink-0">
-                  <span>{c._count.users} usuario{c._count.users !== 1 ? 's' : ''}</span>
-                  <span>{c._count.products} productos</span>
-                  <span>{c._count.sales} ventas</span>
+                  <div className="flex items-center gap-3 mt-0.5 text-xs text-slate-500 flex-wrap">
+                    {c.plan === 'TRIAL' && daysLeft !== null && (
+                      <span className="flex items-center gap-1">
+                        <Clock size={10} />
+                        {daysLeft > 0 ? `${daysLeft}d trial` : 'Trial vencido'}
+                      </span>
+                    )}
+                    <span>{c._count.users} usuarios</span>
+                    <span>{c._count.products} productos</span>
+                    <span>{c._count.sales} ventas</span>
+                  </div>
                 </div>
               </Link>
             )

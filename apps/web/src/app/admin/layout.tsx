@@ -11,60 +11,60 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    if (pathname === '/admin/login') {
-      setReady(true)
-      return
-    }
-    if (!hasAdminKey()) {
-      router.replace('/admin/login')
-    } else {
-      setReady(true)
-    }
+    if (pathname === '/admin/login') { setReady(true); return }
+    if (!hasAdminKey()) router.replace('/admin/login')
+    else setReady(true)
   }, [pathname, router])
 
   if (!ready) return null
-
   if (pathname === '/admin/login') return <>{children}</>
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* Header */}
-      <header className="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-6">
+      <header className="h-14 bg-slate-900 border-b border-slate-800 flex items-center justify-between px-4 md:px-6">
         <div className="flex items-center gap-3">
-          {/* Logo Norde pequeño */}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M5 19L19 5M19 5H9M19 5V15" stroke="#5a95c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="12" height="16" viewBox="0 0 14 18" fill="none" aria-hidden="true">
+            <path d="M 7 0.5 L 13.5 9 L 7 17.5 L 0.5 9 Z" fill="#4f46e5"/>
           </svg>
           <span className="text-sm font-semibold text-slate-300">norde</span>
-          <span className="text-slate-600 mx-1">/</span>
+          <span className="text-slate-600">/</span>
           <span className="text-xs font-medium text-slate-400 bg-slate-800 px-2 py-0.5 rounded">admin</span>
+
+          {/* Nav inline en header */}
+          <nav className="hidden sm:flex items-center gap-1 ml-4">
+            <Link
+              href="/admin/companies"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors"
+            >
+              <Building2 size={13} />
+              Empresas
+            </Link>
+          </nav>
         </div>
+
         <button
           onClick={() => { clearAdminKey(); router.push('/admin/login') }}
           className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors"
         >
           <LogOut size={13} />
-          Salir
+          <span className="hidden sm:inline">Salir</span>
         </button>
       </header>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <aside className="w-52 min-h-[calc(100vh-3.5rem)] bg-slate-900 border-r border-slate-800 p-3">
-          <nav className="space-y-0.5">
-            <Link
-              href="/admin/companies"
-              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors"
-            >
-              <Building2 size={15} />
-              Empresas
-            </Link>
-          </nav>
-        </aside>
+      {/* Nav mobile */}
+      <nav className="sm:hidden flex border-b border-slate-800 bg-slate-900 px-4">
+        <Link
+          href="/admin/companies"
+          className="flex items-center gap-1.5 px-3 py-2.5 text-xs text-slate-400 hover:text-slate-100 transition-colors border-b-2 border-transparent"
+        >
+          <Building2 size={13} />
+          Empresas
+        </Link>
+      </nav>
 
-        {/* Main */}
-        <main className="flex-1 p-6">{children}</main>
-      </div>
+      {/* Main — sin sidebar, full width */}
+      <main className="p-4 md:p-6 max-w-5xl mx-auto">{children}</main>
     </div>
   )
 }
