@@ -30,8 +30,8 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M5 19L19 5M19 5H9M19 5V15" stroke="#5a95c8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="14" height="18" viewBox="0 0 14 18" fill="none">
+            <path d="M 7 0.5 L 13.5 9 L 7 17.5 L 0.5 9 Z" fill="#4f46e5"/>
           </svg>
           <span className="text-xl font-bold text-slate-100 tracking-tight">norde</span>
           <span className="text-xs font-medium text-slate-400 bg-slate-800 px-2 py-0.5 rounded ml-1">admin</span>
@@ -62,6 +62,10 @@ export default function AdminLoginPage() {
             {loading ? 'Verificando...' : 'Ingresar'}
           </button>
         </form>
+
+        <p className="text-center text-xs text-slate-600 mt-4">
+          Clave: norde-admin-2024
+        </p>
       </div>
     </div>
   )
